@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Vida">
+<title>Vida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#eeece8;
+  --s1:#fafaf8;
+  --s2:#e8e5e0;
+  --s3:#dedad4;
+  --b1:#dedad4;
+  --b2:#c8c4bc;
+  --b3:#a8a49c;
+  --t1:#1c1b18;
+  --t2:#6b6860;
+  --t3:#a8a49c;
+  --green:#2a7a46;
+  --green-l:#e8f3ed;
+  --green-m:#9ecdb4;
+  --orange:#b85a18;
+  --orange-l:#fdf0e6;
+  --orange-m:#e8a870;
+  --blue:#1e5fa0;
+  --blue-l:#e6eef8;
+  --red:#a82828;
+  --nav-bg:#18181a;
+  --nav-b:#282828;
+  --nav-off:#585858;
+  --nav-on:#f5f5f3;
+}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{font-family:'DM Sans',sans-serif;color:var(--t1)}
+
+.app{max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;padding:env(safe-area-inset-top,32px) 18px 86px;display:none;animation:fadeUp .2s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* NAV */
+.nav{display:flex;justify-content:space-around;padding:10px 0 max(18px,env(safe-area-inset-bottom));background:var(--nav-bg);border-top:1px solid var(--nav-b);flex-shrink:0}
+.nb{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--nav-off);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:6px 14px;transition:color .15s}
+.nb.active{color:var(--nav-on)}
+.nb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* TYPE */
+.pt{font-size:28px;font-weight:300;letter-spacing:-.03em;color:var(--t1)}
+.ps{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;margin-top:3px;margin-bottom:26px}
+.sl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:18px}
+.mt{margin-top:10px}.mt2{margin-top:22px}
+
+/* TIMER */
+.big-timer{font-family:'DM Mono',monospace;font-size:56px;font-weight:300;letter-spacing:-.03em;text-align:center;padding:22px 0 16px;color:var(--t1);transition:color .3s}
+.big-timer.on{color:var(--green)}
+
+/* STATS */
+.s3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+.sv{background:var(--s2);border-radius:12px;padding:11px 8px;text-align:center}
+.sv-n{font-size:19px;font-weight:500;letter-spacing:-.02em;font-family:'DM Mono',monospace;color:var(--t1)}
+.sv-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:13px 22px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:none;white-space:nowrap}
+.btn-w{width:100%}
+.btn-p{background:var(--t1);color:#fff}.btn-p:active{opacity:.8}
+.btn-o{background:transparent;color:var(--t1);border:1.5px solid var(--b2)}.btn-o:active{background:var(--s2)}
+.btn-d{background:transparent;color:var(--red);border:1.5px solid #a8282830}.btn-d:active{background:#a8282810}
+.btn-s{padding:9px 17px;font-size:13px}
+.brow{display:flex;gap:10px}
+
+/* BARS */
+.bars{display:flex;align-items:flex-end;gap:5px;height:88px;overflow-x:auto;padding-bottom:2px}
+.bc{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:30px}
+.bbar{width:100%;border-radius:4px 4px 0 0;min-height:3px;transition:height .4s}
+.bl{font-size:9px;color:var(--t3)}
+.bv{font-size:9px;color:var(--t2);font-family:'DM Mono',monospace}
+
+/* STREAK GRID */
+.sg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.sd{aspect-ratio:1;border-radius:5px;background:var(--s2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;transition:all .2s}
+.sd.done{background:var(--green-l);border-color:var(--green-m);color:var(--green)}
+.sd.today{border-color:var(--b3)}
+.sd.done.today{border-color:var(--green)}
+
+/* FASTING RING */
+.ring-wrap{display:flex;justify-content:center;margin:6px 0 18px}
+.rc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.rt{font-family:'DM Mono',monospace;font-size:33px;font-weight:300;color:var(--t1)}
+.rs{font-size:11px;color:var(--t3);margin-top:2px}
+.rp{font-size:17px;font-weight:500;margin-top:4px;color:var(--orange)}
+
+/* JOURNAL */
+textarea{width:100%;background:var(--s2);border:1.5px solid var(--b1);border-radius:12px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.75;padding:14px;resize:none;outline:none;-webkit-appearance:none;transition:border-color .2s}
+textarea:focus{border-color:var(--b3)}
+.je{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px;margin-bottom:8px;cursor:pointer}
+.je:active{border-color:var(--b2)}
+.jd{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.jp{font-size:14px;color:var(--t2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* INPUTS */
+select{background:var(--s2);border:1.5px solid var(--b1);border-radius:10px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;-webkit-appearance:none;cursor:pointer}
+input[type=number],input[type=text]{background:var(--s2);border:1.5px solid var(--b1);border-radius:12px;color:var(--t1);font-family:'DM Mono',monospace;font-size:16px;padding:11px 16px;outline:none;-webkit-appearance:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--b3)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--s2);color:var(--t2);font-size:12px;padding:5px 12px;border-radius:50px;border:1px solid var(--b1)}
+.badge svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+
+/* HABIT CHECK */
+.hcheck{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--b2);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.hcheck svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.hcheck.on{background:var(--green);border-color:var(--green)}.hcheck.on svg{opacity:1}
+
+/* HABIT ICON BOX */
+.hibx{width:38px;height:38px;border-radius:10px;background:var(--s2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hibx svg{width:18px;height:18px;stroke:var(--t2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.28);display:flex;align-items:flex-end;justify-content:center;z-index:100;animation:fadeUp .2s}
+.mo{background:var(--s1);border:1px solid var(--b1);border-top:none;border-radius:22px 22px 0 0;padding:26px 22px max(38px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:88dvh;overflow-y:auto}
+.mo-t{font-size:18px;font-weight:500;margin-bottom:18px;color:var(--t1)}
+.mcl{float:right;background:none;border:none;color:var(--t3);font-size:26px;cursor:pointer;line-height:1;margin-top:-4px}
+
+/* MISC */
+.pbar{height:4px;background:var(--s2);border-radius:2px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;transition:width .6s}
+.row{display:flex;align-items:center}.jb{justify-content:space-between}
+.gap{gap:10px}.gap2{gap:8px}
+.tg{color:var(--green)}.to{color:var(--orange)}.tb{color:var(--blue)}.tr{color:var(--red)}.t2{color:var(--t2)}.t3{color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="screens">
+
+    <!-- CORRER -->
+    <div class="screen active" id="s-run">
+      <div class="pt" id="run-greeting">Buenos días</div>
+      <div class="ps">Tracker de carrera</div>
+      <div class="card">
+        <div class="big-timer" id="run-timer">00:00:00</div>
+        <div class="s3">
+          <div class="sv"><div class="sv-n" id="rn-km">0.0</div><div class="sv-l">km</div></div>
+          <div class="sv"><div class="sv-n" id="rn-pace">--:--</div><div class="sv-l">min/km</div></div>
+          <div class="sv"><div class="sv-n" id="rn-cal">0</div><div class="sv-l">kcal</div></div>
+        </div>
+        <div class="brow">
+          <button class="btn btn-p" id="run-btn" style="flex:2" onclick="toggleRun()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Iniciar
+          </button>
+          <button class="btn btn-o" id="run-stop" style="flex:1;display:none" onclick="stopRun()">Terminar</button>
+        </div>
+      </div>
+
+      <div class="mt2"><div class="sl">Tendencia de km recorridos</div>
+        <div class="card" style="padding:14px 12px 10px">
+          <canvas id="km-chart" height="118"></canvas>
+          <div id="km-empty" style="text-align:center;padding:28px;font-size:14px;color:var(--t3);display:none">Sin sesiones aún</div>
+        </div>
+      </div>
+
+      <div class="mt2"><div class="sl">Tiempo por sesión (min)</div>
+        <div class="card"><div class="bars" id="run-bars"></div></div>
+      </div>
+
+      <div class="mt2"><div class="sl">Racha de carrera</div>
+        <div class="card">
+          <div class="row jb" style="margin-bottom:14px">
+            <div>
+              <div style="font-size:36px;font-weight:300;font-family:'DM Mono',monospace;color:var(--t1)" id="run-streak-n">0</div>
+              <div class="t3" style="font-size:11px;margin-top:2px">días consecutivos</div>
+            </div>
+            <div style="width:44px;height:44px;border-radius:12px;background:var(--orange-l);display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+          </div>
+          <div class="sg" id="run-sgrid"></div>
+        </div>
+      </div>
+
+      <div class="mt2"><div class="sl">Logros</div>
+        <div class="badges" id="run-badges"></div>
+      </div>
+    </div>
+
+    <!-- HABITOS -->
+    <div class="screen" id="s-habits">
+      <div class="pt">Hábitos</div>
+      <div class="ps">Racha & calendario</div>
+      <div id="habits-list"></div>
+      <button class="btn btn-o btn-w mt" style="margin-top:12px" onclick="openModal('add-modal')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Agregar hábito
+      </button>
+      <div class="mt2"><div class="sl">Calendario de hábito</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="hab-filter"></div>
+        <div class="card">
+          <div class="row jb" style="margin-bottom:13px">
+            <button onclick="chMonth(-1)" style="background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:4px 10px">‹</button>
+            <div style="font-size:14px;font-weight:500" id="cal-label"></div>
+            <button onclick="chMonth(1)" style="background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:4px 10px">›</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px" id="cal-dow"></div>
+          <div class="sg" id="hab-cal" style="gap:3px"></div>
+          <div class="row jb" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--b1)">
+            <span class="t3" style="font-size:12px">Racha actual</span>
+            <div class="row gap2">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span style="font-size:16px;font-weight:500" id="hab-streak-n">0 días</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALUD -->
+    <div class="screen" id="s-health">
+      <div class="pt">Salud</div>
+      <div class="ps">Peso & tendencia</div>
+      <div class="card">
+        <div class="row jb" style="margin-bottom:13px">
+          <div>
+            <div style="font-size:42px;font-weight:300;letter-spacing:-.04em;font-family:'DM Mono',monospace" id="w-cur">--</div>
+            <div class="t3" style="font-size:11px;margin-top:2px">kilogramos actuales</div>
+          </div>
+          <div id="w-arrow" style="font-size:36px;font-family:'DM Mono',monospace;font-weight:300"></div>
+        </div>
+        <div class="pbar"><div class="pfill" id="w-prog" style="width:0%;background:var(--blue)"></div></div>
+        <div class="row jb" style="margin-top:8px">
+          <span class="t3" style="font-size:11px" id="w-goal-lbl">Meta: no establecida</span>
+          <span class="t3" style="font-size:11px" id="w-diff-lbl"></span>
+        </div>
+      </div>
+      <div class="mt"><div class="sl">Registrar peso</div>
+        <div class="card row gap"><input type="number" id="w-input" placeholder="75.5" step="0.1" style="flex:1"><button class="btn btn-p btn-s" onclick="logWeight()">Guardar</button></div>
+      </div>
+      <div class="mt"><div class="sl">Meta de peso</div>
+        <div class="card row gap"><input type="number" id="wg-input" placeholder="70" step="0.5" style="flex:1"><button class="btn btn-o btn-s" onclick="setWGoal()">Guardar</button></div>
+      </div>
+      <div class="mt2"><div class="sl">Tendencia — historial</div>
+        <div class="card" style="padding:14px 12px 10px">
+          <canvas id="w-chart" height="140"></canvas>
+          <div id="w-empty" style="text-align:center;padding:30px;font-size:14px;color:var(--t3)">Registra tu peso para ver la tendencia</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AYUNO -->
+    <div class="screen" id="s-fast">
+      <div class="pt">Ayuno</div>
+      <div class="ps">Intermitente</div>
+      <div class="card" style="text-align:center">
+        <div class="ring-wrap">
+          <div style="position:relative;width:208px;height:208px">
+            <svg width="208" height="208" viewBox="0 0 208 208" style="transform:rotate(-90deg)">
+              <circle cx="104" cy="104" r="88" fill="none" stroke="var(--s2)" stroke-width="10"/>
+              <circle cx="104" cy="104" r="88" fill="none" stroke="var(--orange)" stroke-width="10"
+                stroke-dasharray="552.9" id="fast-ring" stroke-dashoffset="552.9"
+                stroke-linecap="round" style="transition:stroke-dashoffset .6s ease"/>
+            </svg>
+            <div class="rc"><div class="rt" id="fast-timer">00:00</div><div class="rs" id="fast-sub">en ayuno</div><div class="rp" id="fast-pct">0%</div></div>
+          </div>
+        </div>
+        <div class="s3" style="margin-bottom:16px">
+          <div class="sv"><div class="sv-n" id="fast-goal-v">16</div><div class="sv-l">meta hrs</div></div>
+          <div class="sv"><div class="sv-n" id="fast-el-v">0.0</div><div class="sv-l">hrs ayuno</div></div>
+          <div class="sv"><div class="sv-n" id="fast-stk-v">0</div><div class="sv-l">racha</div></div>
+        </div>
+        <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+          <span class="t3" style="font-size:12px;align-self:center">Protocolo:</span>
+          <button id="fg-12" class="btn btn-o btn-s" onclick="setFG(12)">12h</button>
+          <button id="fg-14" class="btn btn-o btn-s" onclick="setFG(14)">14h</button>
+          <button id="fg-16" class="btn btn-o btn-s" onclick="setFG(16)">16h</button>
+          <button id="fg-18" class="btn btn-o btn-s" onclick="setFG(18)">18h</button>
+          <button id="fg-20" class="btn btn-o btn-s" onclick="setFG(20)">20h</button>
+        </div>
+        <button class="btn btn-p btn-w" id="fast-btn" onclick="toggleFast()">Iniciar ayuno</button>
+        <div class="t3" style="font-size:12px;margin-top:10px" id="fast-start-lbl"></div>
+      </div>
+      <div class="mt2"><div class="sl">Historial reciente</div><div id="fast-hist"></div></div>
+    </div>
+
+    <!-- DIARIO -->
+    <div class="screen" id="s-journal">
+      <div class="pt">Diario</div>
+      <div class="ps">Pensamientos & reflexión</div>
+      <div class="card">
+        <div class="t3" style="font-size:10px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.12em" id="j-today-lbl"></div>
+        <textarea id="j-input" rows="6" placeholder="¿Qué tienes en mente hoy?&#10;&#10;Reflexiona sobre tus metas, gratitud, o lo que sientes..."></textarea>
+        <div class="row jb" style="margin-top:11px">
+          <span class="t3" style="font-size:12px" id="j-wc">0 palabras</span>
+          <div class="row gap2">
+            <select id="j-mood"><option value="">estado</option><option value="En flujo">En flujo</option><option value="Tranquilo">Tranquilo</option><option value="Reflexivo">Reflexivo</option><option value="Inquieto">Inquieto</option><option value="Difícil">Difícil</option></select>
+            <button class="btn btn-p btn-s" onclick="saveJournal()">Guardar</button>
+          </div>
+        </div>
+      </div>
+      <div class="mt2"><div class="sl">Entradas anteriores</div><div id="j-entries"></div></div>
+    </div>
+
+  </div>
+
+  <nav class="nav">
+    <button class="nb active" id="nb-run" onclick="goTo('run')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+      <span>Correr</span>
+    </button>
+    <button class="nb" id="nb-habits" onclick="goTo('habits')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Hábitos</span>
+    </button>
+    <button class="nb" id="nb-health" onclick="goTo('health')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Salud</span>
+    </button>
+    <button class="nb" id="nb-fast" onclick="goTo('fast')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+      <span>Ayuno</span>
+    </button>
+    <button class="nb" id="nb-journal" onclick="goTo('journal')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Diario</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ADD HABIT MODAL -->
+<div class="ov" id="add-modal" style="display:none" onclick="if(event.target===this)closeModal('add-modal')">
+  <div class="mo">
+    <button class="mcl" onclick="closeModal('add-modal')">×</button>
+    <div class="mo-t">Nuevo hábito</div>
+    <input type="text" id="h-name" placeholder="Ej: Meditación, Leer, Ejercicio..." style="width:100%;margin-bottom:14px;font-family:'DM Sans',sans-serif">
+    <div class="sl" style="margin-bottom:10px">Icono</div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px" id="h-icons"></div>
+    <button class="btn btn-p btn-w" onclick="addHabit()">Agregar hábito</button>
+  </div>
+</div>
+
+<!-- JOURNAL VIEW -->
+<div class="ov" id="j-modal" style="display:none" onclick="if(event.target===this)closeModal('j-modal')">
+  <div class="mo">
+    <button class="mcl" onclick="closeModal('j-modal')">×</button>
+    <div class="t3" style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px" id="jm-date"></div>
+    <div class="t2" style="font-size:12px;margin-bottom:14px" id="jm-mood"></div>
+    <div style="font-size:15px;line-height:1.85;color:var(--t2)" id="jm-text"></div>
+  </div>
+</div>
+
+<script>
+// ICON LIBRARY
+const ICONS=[
+  {id:'mind',  l:'Mente',    s:'<circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01"/><path d="M9 13s1 2 3 2 3-2 3-2"/>'},
+  {id:'book',  l:'Lectura',  s:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'},
+  {id:'gym',   l:'Fuerza',   s:'<path d="M6.5 6.5h11M6.5 17.5h11M3 10h3M18 10h3M3 14h3M18 14h3M6 10v4M18 10v4"/>'},
+  {id:'water', l:'Agua',     s:'<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'},
+  {id:'target',l:'Meta',     s:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'},
+  {id:'write', l:'Escribir', s:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>'},
+  {id:'food',  l:'Nutrición',s:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2s-5 2-5 9v4z"/>'},
+  {id:'sleep', l:'Sueño',    s:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'},
+  {id:'music', l:'Música',   s:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'},
+  {id:'plant', l:'Planta',   s:'<path d="M12 22V12"/><path d="M12 12C12 8 8 5 4 6c0 4 3 7 8 6"/><path d="M12 12c0-4 4-7 8-6 0 4-3 7-8 6"/>'},
+  {id:'pill',  l:'Vitaminas',s:'<path d="M10.5 20.5L3.5 13.5a4.95 4.95 0 0 1 7-7l7 7a4.95 4.95 0 0 1-7 7z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/>'},
+  {id:'walk',  l:'Caminar',  s:'<circle cx="12" cy="5" r="1"/><path d="M9 20l1-5-2-3 3-4 2 4h3"/><path d="M6 20h4"/><path d="M15 11l1 4-2 5"/>'}
+];
+const iconSVG=id=>{const x=ICONS.find(i=>i.id===id);return x?x.s:ICONS[0].s;};
+
+// Build icon picker
+document.getElementById('h-icons').innerHTML=ICONS.map((ic,i)=>
+  `<button onclick="pickIcon(this,'${ic.id}')" data-icon="${ic.id}" class="ibt" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--s2);border:1.5px solid ${i===4?'var(--t1)':'var(--b1)'};border-radius:12px;padding:10px 6px;cursor:pointer;transition:border-color .15s">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>
+    <span style="font-size:9px;color:var(--t3)">${ic.l}</span>
+  </button>`
+).join('');
+
+// DOW headers
+document.getElementById('cal-dow').innerHTML=['L','M','X','J','V','S','D'].map(d=>
+  `<div style="text-align:center;font-size:9px;color:var(--t3);padding:3px 0">${d}</div>`
+).join('');
+
+// PERSISTENCE
+const KEY='vida_v3';
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return {};}};
+const persist=d=>{try{localStorage.setItem(KEY,JSON.stringify(d));}catch{}};
+
+let D=load();
+if(!D.run)    D.run    ={sessions:[],streak:0};
+if(!D.habits) D.habits ={list:[],selId:null,calMo:new Date().getMonth(),calYr:new Date().getFullYear()};
+if(!D.health) D.health ={weights:[],goal:null};
+if(!D.fast)   D.fast   ={active:false,startMs:null,goalH:16,history:[],streak:0};
+if(!D.journal)D.journal={entries:[]};
+
+const today=()=>new Date().toISOString().split('T')[0];
+const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split('T')[0];};
+
+if(!D.run.sessions.length){
+  D.run.sessions=[{date:dAgo(13),dur:1560,km:2.8},{date:dAgo(11),dur:1980,km:3.5},{date:dAgo(9),dur:2400,km:4.2},{date:dAgo(7),dur:2100,km:3.8},{date:dAgo(5),dur:2700,km:4.8},{date:dAgo(3),dur:2880,km:5.1},{date:dAgo(1),dur:3000,km:5.3}];
+  D.run.streak=4;
+}
+if(!D.health.weights.length){
+  D.health.weights=[{date:dAgo(35),kg:82.0},{date:dAgo(28),kg:81.2},{date:dAgo(21),kg:80.5},{date:dAgo(14),kg:79.8},{date:dAgo(7),kg:79.0},{date:dAgo(0),kg:78.3}];
+  D.health.goal=73;
+}
+if(!D.habits.list.length){
+  D.habits.list=[{id:'h1',name:'Meditación',icon:'mind',logs:[],streak:0},{id:'h2',name:'Lectura',icon:'book',logs:[],streak:0},{id:'h3',name:'Agua',icon:'water',logs:[],streak:0}];
+  D.habits.list.forEach(h=>{for(let i=0;i<20;i++){if(Math.random()>.35)h.logs.push(dAgo(i));}h.streak=cStr(h);});
+  D.habits.selId='h1';
+}
+if(!D.fast.history.length){D.fast.history=[{date:dAgo(1),hours:16.2,goal:16},{date:dAgo(2),hours:14.8,goal:16},{date:dAgo(3),hours:16.5,goal:16}];D.fast.streak=2;}
+if(!D.journal.entries.length){D.journal.entries=[{id:'j1',date:today(),mood:'En flujo',text:'Hoy tuve una gran carrera matutina. 5.3 km en 50 minutos. El ayuno de 16 horas fue fácil. Sigo construyendo momentum.'},{id:'j2',date:dAgo(1),mood:'Tranquilo',text:'Día tranquilo. Leí por una hora y medité 15 minutos. Cuando inicio el día con meditación todo fluye mejor.'},{id:'j3',date:dAgo(2),mood:'Reflexivo',text:'Reflexionando sobre mis metas a largo plazo. ¿Qué quiero lograr en los próximos 90 días?'}];}
+persist(D);
+
+// UTILS
+const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const pad=n=>String(Math.floor(n)).padStart(2,'0');
+const fmtT=s=>`${pad(s/3600)}:${pad((s%3600)/60)}:${pad(s%60)}`;
+const fmtSh=s=>`${pad(s/60)}:${pad(s%60)}`;
+const fmtD=ds=>{const d=new Date(ds+'T12:00');return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;};
+function cStr(h){let s=0;const d=new Date();while(true){const k=d.toISOString().split('T')[0];if(h.logs.includes(k)){s++;d.setDate(d.getDate()-1);}else break;}return s;}
+const greeting=()=>{const h=new Date().getHours();return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches';};
+
+// NAV
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+n).classList.add('active');
+  document.getElementById('nb-'+n).classList.add('active');
+  if(n==='run')    renderRun();
+  if(n==='habits') renderHabits();
+  if(n==='health') renderHealth();
+  if(n==='fast')   renderFast();
+  if(n==='journal')renderJournal();
+}
+function openModal(id){document.getElementById(id).style.display='flex';}
+function closeModal(id){document.getElementById(id).style.display='none';}
+
+// RUN
+let runInt=null,runStart=null,runElapsed=0,runRunning=false,kmCI=null;
+function toggleRun(){
+  if(!runRunning){
+    runRunning=true;runStart=Date.now()-runElapsed*1000;
+    runInt=setInterval(tickRun,1000);
+    document.getElementById('run-btn').innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pausar';
+    document.getElementById('run-stop').style.display='';
+    document.getElementById('run-timer').classList.add('on');
+  }else{
+    runRunning=false;clearInterval(runInt);
+    document.getElementById('run-btn').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reanudar';
+    document.getElementById('run-timer').classList.remove('on');
+  }
+}
+function tickRun(){
+  runElapsed=Math.floor((Date.now()-runStart)/1000);
+  document.getElementById('run-timer').textContent=fmtT(runElapsed);
+  const km=+(runElapsed/60/6).toFixed(1);
+  document.getElementById('rn-km').textContent=km;
+  document.getElementById('rn-cal').textContent=Math.floor(runElapsed/60*8);
+  if(km>0){const pm=Math.floor(runElapsed/60/km);const ps=Math.round(((runElapsed/60/km)-pm)*60);document.getElementById('rn-pace').textContent=`${pm}:${pad(ps)}`;}
+}
+function stopRun(){
+  runRunning=false;clearInterval(runInt);
+  if(runElapsed>30){const km=+(runElapsed/60/6).toFixed(1);D.run.sessions.push({date:today(),dur:runElapsed,km});if(D.run.sessions.length>20)D.run.sessions.shift();D.run.streak++;persist(D);}
+  runElapsed=0;runStart=null;
+  document.getElementById('run-timer').textContent='00:00:00';
+  document.getElementById('run-timer').classList.remove('on');
+  document.getElementById('run-btn').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg> Iniciar';
+  document.getElementById('run-stop').style.display='none';
+  document.getElementById('rn-km').textContent='0.0';
+  document.getElementById('rn-cal').textContent='0';
+  document.getElementById('rn-pace').textContent='--:--';
+  renderRun();
+}
+function renderRun(){
+  document.getElementById('run-greeting').textContent=greeting();
+  renderKmChart();renderTimeBars();renderRunStreak();renderBadges();
+}
+function renderKmChart(){
+  const ss=D.run.sessions.slice(-12);
+  const cv=document.getElementById('km-chart'),em=document.getElementById('km-empty');
+  if(!ss.length){cv.style.display='none';em.style.display='block';return;}
+  cv.style.display='block';em.style.display='none';
+  if(kmCI)kmCI.destroy();
+  const ctx=cv.getContext('2d');
+  const gr=ctx.createLinearGradient(0,0,0,118);
+  gr.addColorStop(0,'rgba(42,122,70,.15)');gr.addColorStop(1,'rgba(42,122,70,.01)');
+  kmCI=new Chart(cv,{type:'line',data:{labels:ss.map(s=>{const d=new Date(s.date+'T12:00');return `${DAYS[d.getDay()]} ${d.getDate()}`;}),datasets:[{data:ss.map(s=>s.km),borderColor:'#2a7a46',backgroundColor:gr,tension:.4,pointRadius:4,pointBackgroundColor:'#2a7a46',fill:true,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#dedad4',borderWidth:1,titleColor:'#6b6860',bodyColor:'#1c1b18',callbacks:{label:c=>`${c.raw} km`}}},scales:{x:{ticks:{color:'#a8a49c',font:{size:10}},grid:{color:'#eeece8'}},y:{ticks:{color:'#a8a49c',font:{size:10},callback:v=>v+'km'},grid:{color:'#eeece8'}}}}});
+}
+function renderTimeBars(){
+  const ss=D.run.sessions.slice(-7);const mx=Math.max(...ss.map(s=>s.dur/60),1);
+  document.getElementById('run-bars').innerHTML=ss.map(s=>{const m=Math.round(s.dur/60);const h=Math.max(8,Math.round(m/mx*80));const d=new Date(s.date+'T12:00');return `<div class="bc"><div class="bv">${m}m</div><div class="bbar" style="height:${h}px;background:#2a7a4620;border:1px solid #2a7a4660"></div><div class="bl">${DAYS[d.getDay()]}</div></div>`;}).join('');
+}
+function renderRunStreak(){
+  document.getElementById('run-streak-n').textContent=D.run.streak;
+  const days=[];for(let i=20;i>=0;i--)days.push(dAgo(i));
+  document.getElementById('run-sgrid').innerHTML=days.map(d=>{const done=D.run.sessions.some(s=>s.date===d);const t=d===today();return `<div class="sd${done?' done':''}${t?' today':''}">${new Date(d+'T12:00').getDate()}</div>`;}).join('');
+}
+function renderBadges(){
+  const t=D.run.sessions.length,sk=D.run.streak,tot=D.run.sessions.reduce((a,s)=>a+s.km,0);
+  const iB='<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+  const iS='<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  const badges=[];
+  if(t>=1)badges.push([iB,'Primera carrera']);if(t>=5)badges.push([iB,'5 carreras']);if(t>=10)badges.push([iS,'10 carreras']);
+  if(sk>=3)badges.push([iB,'Racha 3 días']);if(sk>=7)badges.push([iS,'Racha 7 días']);
+  if(D.run.sessions.some(s=>s.km>=5))badges.push([iS,'5 km completados']);if(tot>=50)badges.push([iS,'50 km totales']);
+  document.getElementById('run-badges').innerHTML=badges.map(([ic,lbl])=>`<div class="badge">${ic}${lbl}</div>`).join('')||'<div class="t3" style="font-size:13px">Completa carreras para desbloquear logros</div>';
+}
+
+// HABITS
+let selIcon='target';
+function renderHabits(){
+  document.getElementById('habits-list').innerHTML=D.habits.list.map(h=>{const done=h.logs.includes(today());return `<div class="card" style="margin-bottom:10px"><div class="row jb" style="padding:0"><div class="row gap" style="flex:1"><div class="hibx"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${iconSVG(h.icon)}</svg></div><div><div style="font-size:15px;font-weight:500">${h.name}</div><div class="t3" style="font-size:12px">${h.streak} días consecutivos</div></div></div><button class="hcheck${done?' on':''}" onclick="togHabit('${h.id}')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button></div></div>`;}).join('')||'<div class="t3" style="padding:20px 0;text-align:center;font-size:14px">Agrega tu primer hábito</div>';
+  renderHabFilter();renderHabCal();
+}
+function togHabit(id){const h=D.habits.list.find(x=>x.id===id);if(!h)return;const i=h.logs.indexOf(today());if(i>=0)h.logs.splice(i,1);else h.logs.push(today());h.streak=cStr(h);persist(D);renderHabits();}
+function renderHabFilter(){
+  document.getElementById('hab-filter').innerHTML=D.habits.list.map(h=>{const on=D.habits.selId===h.id;return `<button onclick="selHab('${h.id}')" style="display:inline-flex;align-items:center;gap:6px;background:${on?'var(--green-l)':'var(--s1)'};border:1.5px solid ${on?'var(--green-m)':'var(--b1)'};color:${on?'var(--green)':'var(--t2)'};border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${iconSVG(h.icon)}</svg>${h.name}</button>`;}).join('');
+}
+function selHab(id){D.habits.selId=id;renderHabFilter();renderHabCal();}
+function chMonth(dir){D.habits.calMo+=dir;if(D.habits.calMo>11){D.habits.calMo=0;D.habits.calYr++;}if(D.habits.calMo<0){D.habits.calMo=11;D.habits.calYr--;}renderHabCal();}
+function renderHabCal(){
+  const h=D.habits.list.find(x=>x.id===D.habits.selId);const yr=D.habits.calYr,mo=D.habits.calMo;
+  document.getElementById('cal-label').textContent=`${MONTHS[mo]} ${yr}`;
+  const off=(new Date(yr,mo,1).getDay()+6)%7;const days=new Date(yr,mo+1,0).getDate();
+  let c='';for(let i=0;i<off;i++)c+='<div></div>';
+  for(let d=1;d<=days;d++){const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const done=h&&h.logs.includes(ds);const t=ds===today();c+=`<div class="sd${done?' done':''}${t?' today':''}" style="font-size:9px">${d}</div>`;}
+  document.getElementById('hab-cal').innerHTML=c;
+  document.getElementById('hab-streak-n').textContent=(h?h.streak:0)+' días';
+}
+function pickIcon(btn,id){selIcon=id;document.querySelectorAll('.ibt').forEach(b=>b.style.borderColor='var(--b1)');btn.style.borderColor='var(--t1)';}
+function addHabit(){const name=document.getElementById('h-name').value.trim();if(!name)return;D.habits.list.push({id:'h'+Date.now(),name,icon:selIcon,logs:[],streak:0});if(!D.habits.selId)D.habits.selId=D.habits.list[0].id;document.getElementById('h-name').value='';persist(D);closeModal('add-modal');renderHabits();}
+
+// HEALTH
+let wCI=null;
+function renderHealth(){
+  const ws=D.health.weights;
+  if(ws.length){const cur=ws[ws.length-1].kg;const prev=ws.length>1?ws[ws.length-2].kg:cur;document.getElementById('w-cur').textContent=cur.toFixed(1);const diff=cur-prev;const ae=document.getElementById('w-arrow');ae.textContent=diff<-0.05?'↓':diff>0.05?'↑':'→';ae.className=diff<-0.05?'tg':diff>0.05?'tr':'t3';if(D.health.goal){const start=ws[0].kg;const rng=Math.abs(start-D.health.goal)||1;const pct=Math.min(100,Math.round(Math.abs(start-cur)/rng*100));document.getElementById('w-prog').style.width=pct+'%';document.getElementById('w-prog').style.background=cur>D.health.goal?'var(--orange)':'var(--green)';const dd=(cur-D.health.goal).toFixed(1);document.getElementById('w-diff-lbl').textContent=(dd>0?'+':'')+dd+' kg para meta';}}else{document.getElementById('w-cur').textContent='--';document.getElementById('w-arrow').textContent='';}
+  document.getElementById('w-goal-lbl').textContent=D.health.goal?`Meta: ${D.health.goal} kg`:'Meta: no establecida';
+  renderWChart();
+}
+function logWeight(){const v=parseFloat(document.getElementById('w-input').value);if(isNaN(v))return;D.health.weights.push({date:today(),kg:v});document.getElementById('w-input').value='';persist(D);renderHealth();}
+function setWGoal(){const v=parseFloat(document.getElementById('wg-input').value);if(isNaN(v))return;D.health.goal=v;document.getElementById('wg-input').value='';persist(D);renderHealth();}
+function renderWChart(){
+  const ws=D.health.weights.slice(-12);const cv=document.getElementById('w-chart'),em=document.getElementById('w-empty');
+  if(!ws.length){cv.style.display='none';em.style.display='block';return;}
+  cv.style.display='block';em.style.display='none';
+  if(wCI)wCI.destroy();
+  const ctx=cv.getContext('2d');const gr=ctx.createLinearGradient(0,0,0,140);gr.addColorStop(0,'rgba(30,95,160,.14)');gr.addColorStop(1,'rgba(30,95,160,.01)');
+  const ds=[{label:'Peso',data:ws.map(w=>w.kg),borderColor:'#1e5fa0',backgroundColor:gr,tension:.4,pointRadius:4,pointBackgroundColor:'#1e5fa0',fill:true,borderWidth:2}];
+  if(D.health.goal)ds.push({label:'Meta',data:ws.map(()=>D.health.goal),borderColor:'#2a7a4660',borderDash:[4,4],pointRadius:0,fill:false,borderWidth:1.5});
+  wCI=new Chart(cv,{type:'line',data:{labels:ws.map(w=>fmtD(w.date).split(' ').slice(0,2).join(' ')),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#dedad4',borderWidth:1,titleColor:'#6b6860',bodyColor:'#1c1b18'}},scales:{x:{ticks:{color:'#a8a49c',font:{size:10}},grid:{color:'#eeece8'}},y:{ticks:{color:'#a8a49c',font:{size:10},callback:v=>v+'kg'},grid:{color:'#eeece8'}}}}});
+}
+
+// FAST
+let fastInt=null;
+function setFG(h){D.fast.goalH=h;persist(D);renderFast();}
+function toggleFast(){
+  if(!D.fast.active){D.fast.active=true;D.fast.startMs=Date.now();persist(D);fastInt=setInterval(tickFast,1000);document.getElementById('fast-btn').textContent='Detener ayuno';document.getElementById('fast-btn').className='btn btn-d btn-w';}
+  else{const hrs=(Date.now()-D.fast.startMs)/3600000;D.fast.history.unshift({date:today(),hours:+hrs.toFixed(1),goal:D.fast.goalH});if(D.fast.history.length>7)D.fast.history.pop();if(hrs>=D.fast.goalH)D.fast.streak++;D.fast.active=false;D.fast.startMs=null;persist(D);clearInterval(fastInt);document.getElementById('fast-btn').textContent='Iniciar ayuno';document.getElementById('fast-btn').className='btn btn-p btn-w';document.getElementById('fast-timer').textContent='00:00';document.getElementById('fast-pct').textContent='0%';document.getElementById('fast-el-v').textContent='0.0';document.getElementById('fast-sub').textContent='en ayuno';document.getElementById('fast-ring').setAttribute('stroke-dashoffset','552.9');document.getElementById('fast-start-lbl').textContent='';renderFast();}
+}
+function tickFast(){if(!D.fast.startMs)return;const el=Math.floor((Date.now()-D.fast.startMs)/1000);const gs=D.fast.goalH*3600;const p=Math.min(1,el/gs);document.getElementById('fast-timer').textContent=fmtSh(el);document.getElementById('fast-el-v').textContent=(el/3600).toFixed(1);document.getElementById('fast-pct').textContent=Math.round(p*100)+'%';document.getElementById('fast-ring').setAttribute('stroke-dashoffset',552.9*(1-p));if(el>=gs)document.getElementById('fast-sub').textContent='Meta alcanzada';}
+function renderFast(){
+  document.getElementById('fast-goal-v').textContent=D.fast.goalH;document.getElementById('fast-stk-v').textContent=D.fast.streak;
+  [12,14,16,18,20].forEach(h=>{const b=document.getElementById('fg-'+h);if(!b)return;const on=D.fast.goalH===h;b.style.background=on?'var(--orange-l)':'transparent';b.style.borderColor=on?'var(--orange)':'var(--b2)';b.style.color=on?'var(--orange)':'var(--t2)';});
+  if(D.fast.active&&D.fast.startMs){const st=new Date(D.fast.startMs);document.getElementById('fast-start-lbl').textContent=`Iniciado a las ${st.getHours()}:${pad(st.getMinutes())}`;document.getElementById('fast-btn').textContent='Detener ayuno';document.getElementById('fast-btn').className='btn btn-d btn-w';if(!fastInt)fastInt=setInterval(tickFast,1000);tickFast();}
+  const el=document.getElementById('fast-hist');
+  const chkSVG='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  const xSVG='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  el.innerHTML=D.fast.history.slice(0,5).map(f=>{const done=f.hours>=f.goal;return `<div class="card row jb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:500">${fmtD(f.date)}</div><div class="t3" style="font-size:12px">${f.hours}h de ${f.goal}h meta</div></div><div style="display:flex;align-items:center;gap:5px;font-size:13px;color:${done?'var(--green)':'var(--orange)'}">${done?chkSVG:xSVG} ${done?'Completo':'Parcial'}</div></div>`;}).join('')||'<div class="t3" style="padding:16px 0;font-size:14px">Sin registros aún</div>';
+}
+
+// JOURNAL
+function renderJournal(){
+  const now=new Date();document.getElementById('j-today-lbl').textContent=`${DAYS[now.getDay()]}, ${now.getDate()} de ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('j-entries').innerHTML=D.journal.entries.map(e=>`<div class="je" onclick="viewJ('${e.id}')"><div class="jd">${fmtD(e.date)}${e.mood?' · '+e.mood:''}</div><div class="jp">${e.text}</div></div>`).join('')||'<div class="t3" style="padding:16px 0;font-size:14px">Escribe tu primera entrada</div>';
+}
+document.getElementById('j-input').addEventListener('input',function(){document.getElementById('j-wc').textContent=this.value.trim().split(/\s+/).filter(Boolean).length+' palabras';});
+function saveJournal(){const text=document.getElementById('j-input').value.trim();if(!text)return;const mood=document.getElementById('j-mood').value;D.journal.entries.unshift({id:'j'+Date.now(),date:today(),mood,text});document.getElementById('j-input').value='';document.getElementById('j-mood').value='';document.getElementById('j-wc').textContent='0 palabras';persist(D);renderJournal();}
+function viewJ(id){const e=D.journal.entries.find(x=>x.id===id);if(!e)return;document.getElementById('jm-date').textContent=fmtD(e.date);document.getElementById('jm-mood').textContent=e.mood||'';document.getElementById('jm-text').textContent=e.text;openModal('j-modal');}
+
+// BOOT
+renderRun();
+if(D.fast.active&&D.fast.startMs){fastInt=setInterval(tickFast,1000);tickFast();}
+</script>
+</body>
+</html>
