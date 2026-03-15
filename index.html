@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ===== BASE / RESET ===== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -525,6 +527,51 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 @keyframes mapDrift{from{background-position:0 0}to{background-position:30px 30px}}
 @keyframes ringPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ===== LIGHT MODE ===== */
+html.light{
+  --bg:#f4f4f8;--bg1:#ffffff;--bg2:#ebebf0;--bg3:#e0e0e8;--bg4:#d5d5e0;
+  --t2:#3a3a4a;--t3:#7070a0;
+}
+html.light body{background:#f4f4f8;color:#1a1a2e}
+html.light #bnav{background:rgba(244,244,248,.96);border-top-color:rgba(0,0,0,.09)}
+html.light .run-today-bar{background:rgba(244,244,248,.96);border-color:rgba(0,0,0,.08)}
+html.light .ro-stats{background:linear-gradient(to top,#f4f4f8 75%,rgba(244,244,248,.5))}
+html.light .ro-metric{background:rgba(200,200,210,.4)}
+html.light #runOv,html.light #postRunOv{background:#f4f4f8}
+html.light .rank-item{border-bottom-color:rgba(0,0,0,.06)}
+html.light .rhi{border-bottom-color:rgba(0,0,0,.06)}
+
+/* ===== DARK MODE TOGGLE ===== */
+.dm-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--bg2);border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t2);transition:background .2s;
+}
+.dm-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== MAP CONTAINERS ===== */
+#runMapBg{position:absolute;inset:0;z-index:0}
+#runMapBg .leaflet-container,
+#runOvMap .leaflet-container{width:100%;height:100%;background:var(--bg)}
+.leaflet-attribution-flag{display:none!important}
+.leaflet-control-attribution{font-size:9px!important;opacity:.5}
+
+/* ===== AVATAR INITIALS ===== */
+.av-init{
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;line-height:1;
+}
+.rank-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
+
+/* ===== ICON HELPERS ===== */
+.kpi-icon svg,.ro-metric-icon svg{display:block}
+.sec-icon{display:inline-flex;align-items:center;gap:6px}
+.sec-icon svg{width:16px;height:16px;flex-shrink:0}
+.badge-icon svg{width:28px;height:28px;display:block}
+.rec-icon svg{width:24px;height:24px;display:block}
+.rhi-icon svg{width:22px;height:22px;display:block}
 </style>
 </head>
 <body>
@@ -548,26 +595,31 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     <div class="h-header">
       <div class="h-greet">
         <small>Buenos días</small>
-        <h1>Hola, Carlos 👋</h1>
+        <h1>Hola, Carlos</h1>
       </div>
-      <div class="h-avatar" onclick="openProfile()">🧑‍🦱</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="dm-btn" id="dmBtn" onclick="toggleDarkMode()" title="Cambiar tema">
+          <svg id="dmIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div class="h-avatar" onclick="openProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      </div>
     </div>
 
     <div class="friends-wrap">
       <div class="friends-title">Amigos activos</div>
       <div class="friends-row">
-        <div class="friend"><div class="friend-av running">👩‍🦰</div><span>Ana</span></div>
-        <div class="friend"><div class="friend-av online">🧔</div><span>Thomas</span></div>
-        <div class="friend"><div class="friend-av running">🧕</div><span>Budi</span></div>
-        <div class="friend"><div class="friend-av">👨‍🦳</div><span>Johny</span></div>
-        <div class="friend"><div class="friend-av online">🧑‍🦲</div><span>Andy</span></div>
-        <div class="friend"><div class="friend-av">👱‍♀️</div><span>Laura</span></div>
+        <div class="friend"><div class="friend-av running av-init" style="background:rgba(255,87,34,.18);color:var(--or)">AN</div><span>Ana</span></div>
+        <div class="friend"><div class="friend-av online av-init" style="background:rgba(0,184,148,.18);color:var(--gr)">TH</div><span>Thomas</span></div>
+        <div class="friend"><div class="friend-av running av-init" style="background:rgba(108,92,231,.18);color:var(--pu)">BU</div><span>Budi</span></div>
+        <div class="friend"><div class="friend-av av-init" style="background:rgba(253,203,110,.18);color:var(--yl)">JO</div><span>Johny</span></div>
+        <div class="friend"><div class="friend-av online av-init" style="background:rgba(0,184,148,.18);color:var(--gr)">AW</div><span>Andy</span></div>
+        <div class="friend"><div class="friend-av av-init" style="background:rgba(232,67,147,.18);color:var(--rd)">LA</div><span>Laura</span></div>
       </div>
     </div>
 
     <div class="week-card">
       <div class="week-label">
-        <span>🏃 Entrenamiento última semana</span>
+        <span>Entrenamiento última semana</span>
         <span style="color:var(--or);font-size:12px;font-weight:800;cursor:pointer" onclick="showTab('progress')">Ver todo →</span>
       </div>
       <div class="week-km" id="weekKm">48<span style="font-size:32px">,</span>75 <span style="font-size:24px;color:var(--t3)">KM</span></div>
@@ -579,34 +631,34 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-icon">❤️</div>
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
         <div class="kpi-val">142</div>
         <div class="kpi-lbl">FC Promedio (bpm)</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">⚡</div>
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="kpi-val">5'38"</div>
         <div class="kpi-lbl">Pace Promedio</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">⏱️</div>
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="kpi-val">4h 12m</div>
         <div class="kpi-lbl">Tiempo Total</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon">🔥</div>
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></div>
         <div class="kpi-val" id="homeCalories">1,840</div>
         <div class="kpi-lbl">Calorías</div>
       </div>
     </div>
 
     <div class="section-hdr">
-      <div class="section-title">🏅 Clasificación Semanal</div>
+      <div class="section-title">Clasificación Semanal</div>
       <div class="see-all">Ver más</div>
     </div>
     <div class="rank-item">
       <div class="rank-n gold">1</div>
-      <div class="rank-av">🧑‍🦲</div>
+      <div class="rank-av" style="background:rgba(0,184,148,.18);color:var(--gr)">AW</div>
       <div class="rank-info">
         <div class="rank-name">Andy William</div>
         <div class="rank-km-label">Esta semana</div>
@@ -615,7 +667,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     </div>
     <div class="rank-item">
       <div class="rank-n" style="color:var(--t2)">2</div>
-      <div class="rank-av">🧑‍🦱</div>
+      <div class="rank-av" style="background:rgba(255,87,34,.18);color:var(--or)">TÚ</div>
       <div class="rank-info">
         <div class="rank-name">Tú</div>
         <div class="rank-km-label">Esta semana</div>
@@ -624,7 +676,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     </div>
     <div class="rank-item">
       <div class="rank-n">3</div>
-      <div class="rank-av">🧔</div>
+      <div class="rank-av" style="background:rgba(108,92,231,.18);color:var(--pu)">TS</div>
       <div class="rank-info">
         <div class="rank-name">Thomas Speed</div>
         <div class="rank-km-label">Esta semana</div>
@@ -637,12 +689,12 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 
 <!-- ====== RUN ====== -->
 <div id="run" class="screen">
-  <div class="run-map-grid"></div>
+  <div id="runMapBg"></div>
   <div class="run-ready">
     <div class="run-are-you">¿ESTÁS<em>LISTO?</em></div>
     <div class="run-mode-toggle">
-      <button class="run-mode-btn active" id="modeRun" onclick="setMode('run')">🏃 Correr</button>
-      <button class="run-mode-btn" id="modeWalk" onclick="setMode('walk')">🚶 Caminar</button>
+      <button class="run-mode-btn active" id="modeRun" onclick="setMode('run')">Correr</button>
+      <button class="run-mode-btn" id="modeWalk" onclick="setMode('walk')">Caminar</button>
     </div>
     <button class="go-btn" onclick="startRun()">GO!</button>
     <div class="run-hint">Toca GO para iniciar el seguimiento GPS</div>
@@ -668,7 +720,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
   <div class="scr-body">
     <div style="padding:56px 0 0"></div>
     <div class="ch-hero">
-      <div class="ch-hero-eyebrow">🏆 Reto del Mes</div>
+      <div class="ch-hero-eyebrow">Reto del Mes</div>
       <div class="ch-hero-title">160 KM en Marzo 2026</div>
       <div class="ch-hero-desc">Completa 160 KM antes de fin de mes y desbloquea recompensas exclusivas.</div>
       <div class="ch-hero-prog">
@@ -692,7 +744,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     </div>
 
     <div class="ch-card" data-cat="diarios">
-      <div class="ch-icon" style="background:rgba(0,184,148,.12)">🦶</div>
+      <div class="ch-icon" style="background:rgba(0,184,148,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M4 16s-1-1-1-2 1-2 1-2"/><path d="M7 19s-1-1-1-2 1-2 1-2"/><circle cx="16" cy="8" r="2"/><path d="M18 14s2.5-1 2.5-3-2.5-4-5.5-5l-5 7 3 4 5-3z"/></svg></div>
       <div class="ch-card-info">
         <div class="ch-card-top"><div class="ch-card-title">Paso a paso</div><div class="ch-diff diff-easy">Fácil</div></div>
         <div class="ch-card-desc">Alcanza 5,000 pasos hoy</div>
@@ -701,7 +753,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
       </div>
     </div>
     <div class="ch-card" data-cat="diarios">
-      <div class="ch-icon" style="background:rgba(253,203,110,.12)">⚡</div>
+      <div class="ch-icon" style="background:rgba(253,203,110,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
       <div class="ch-card-info">
         <div class="ch-card-top"><div class="ch-card-title">Sprint del día</div><div class="ch-diff diff-med">Medio</div></div>
         <div class="ch-card-desc">Corre 10 KM en un día</div>
@@ -710,7 +762,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
       </div>
     </div>
     <div class="ch-card" data-cat="semanales">
-      <div class="ch-icon" style="background:rgba(232,67,147,.12)">🏅</div>
+      <div class="ch-icon" style="background:rgba(232,67,147,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
       <div class="ch-card-info">
         <div class="ch-card-top"><div class="ch-card-title">Maratón semanal</div><div class="ch-diff diff-hard">Difícil</div></div>
         <div class="ch-card-desc">42 KM esta semana</div>
@@ -719,7 +771,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
       </div>
     </div>
     <div class="ch-card" data-cat="semanales">
-      <div class="ch-icon" style="background:rgba(108,92,231,.12)">🔥</div>
+      <div class="ch-icon" style="background:rgba(108,92,231,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--pu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></div>
       <div class="ch-card-info">
         <div class="ch-card-top"><div class="ch-card-title">5 días seguidos</div><div class="ch-diff diff-med">Medio</div></div>
         <div class="ch-card-desc">Entrena 5 días consecutivos</div>
@@ -728,7 +780,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
       </div>
     </div>
     <div class="ch-card" data-cat="diarios">
-      <div class="ch-icon" style="background:rgba(9,132,227,.12)">💧</div>
+      <div class="ch-icon" style="background:rgba(9,132,227,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
       <div class="ch-card-info">
         <div class="ch-card-top"><div class="ch-card-title">Cardio Zone</div><div class="ch-diff diff-med">Medio</div></div>
         <div class="ch-card-desc">30 min en Zona 3-4 hoy</div>
@@ -738,13 +790,13 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     </div>
 
     <div class="section-hdr">
-      <div class="section-title">📊 Clasificación Semanal</div>
+      <div class="section-title">Clasificación Semanal</div>
     </div>
-    <div class="rank-item"><div class="rank-n gold">1</div><div class="rank-av">🧑‍🦱</div><div class="rank-info"><div class="rank-name">Budi Santoso</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">154.80 KM</div></div>
-    <div class="rank-item"><div class="rank-n" style="color:var(--t2)">2</div><div class="rank-av">👩‍🦰</div><div class="rank-info"><div class="rank-name">Ana Summer</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">152.87 KM</div></div>
-    <div class="rank-item"><div class="rank-n">3</div><div class="rank-av">🧔</div><div class="rank-info"><div class="rank-name">Thomas Speed</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">151.24 KM</div></div>
-    <div class="rank-item"><div class="rank-n">4</div><div class="rank-av">🧑‍🦲</div><div class="rank-info"><div class="rank-name">Andy William</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">150.94 KM</div></div>
-    <div class="rank-item"><div class="rank-n">5</div><div class="rank-av">🧑‍🦱</div><div class="rank-info"><div class="rank-name">Tú</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val" id="myRankKm">149.13 KM</div></div>
+    <div class="rank-item"><div class="rank-n gold">1</div><div class="rank-av" style="background:rgba(108,92,231,.18);color:var(--pu)">BS</div><div class="rank-info"><div class="rank-name">Budi Santoso</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">154.80 KM</div></div>
+    <div class="rank-item"><div class="rank-n" style="color:var(--t2)">2</div><div class="rank-av" style="background:rgba(255,87,34,.18);color:var(--or)">AN</div><div class="rank-info"><div class="rank-name">Ana Summer</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">152.87 KM</div></div>
+    <div class="rank-item"><div class="rank-n">3</div><div class="rank-av" style="background:rgba(9,132,227,.18);color:var(--bl)">TS</div><div class="rank-info"><div class="rank-name">Thomas Speed</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">151.24 KM</div></div>
+    <div class="rank-item"><div class="rank-n">4</div><div class="rank-av" style="background:rgba(0,184,148,.18);color:var(--gr)">AW</div><div class="rank-info"><div class="rank-name">Andy William</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val">150.94 KM</div></div>
+    <div class="rank-item"><div class="rank-n">5</div><div class="rank-av" style="background:rgba(253,203,110,.18);color:var(--yl)">TÚ</div><div class="rank-info"><div class="rank-name">Tú</div><div class="rank-km-label">Esta semana</div></div><div class="rank-km-val" id="myRankKm">149.13 KM</div></div>
     <div style="height:12px"></div>
   </div>
 </div>
@@ -774,57 +826,57 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
       <div class="prog-stat-card">
         <div class="prog-stat-val" id="pStreak">8</div>
         <div class="prog-stat-lbl">Días de Racha</div>
-        <div class="prog-stat-trend">🔥 días activos</div>
+        <div class="prog-stat-trend">días activos</div>
       </div>
     </div>
 
     <div class="section-hdr">
-      <div class="section-title">🗓️ Tu Actividad</div>
+      <div class="section-title">Tu Actividad</div>
       <div class="see-all">Esta semana</div>
     </div>
 
     <div class="act-card" id="actCards">
       <div class="act-card-hdr" style="background:linear-gradient(135deg,#0984E3,#00B4DB)">
-        <div class="act-card-type">🏃 Carrera del Lunes</div>
+        <div class="act-card-type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg> Carrera del Lunes</div>
         <div class="act-card-date">Hoy</div>
       </div>
       <div class="act-card-body">
         <div class="act-km">6<span style="font-size:30px">,</span>27</div>
         <div class="act-unit">Kilómetros</div>
         <div class="act-meta">
-          <div class="act-meta-item">⏱️ 44:58</div>
-          <div class="act-meta-item">⚡ 7'09"/km</div>
-          <div class="act-meta-item">🔥 568 kcal</div>
+          <div class="act-meta-item">44:58</div>
+          <div class="act-meta-item">7'09"/km</div>
+          <div class="act-meta-item">568 kcal</div>
         </div>
       </div>
     </div>
     <div class="act-card">
       <div class="act-card-hdr" style="background:linear-gradient(135deg,#00B894,#55efc4)">
-        <div class="act-card-type">🚶 Caminata Dominical</div>
+        <div class="act-card-type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="5" r="2"/><path d="M9 20l1-7 2 2 3-5"/><path d="M8 14l-2 6m9-6l2 6"/></svg> Caminata Dominical</div>
         <div class="act-card-date">Ayer</div>
       </div>
       <div class="act-card-body">
         <div class="act-km">10<span style="font-size:30px">,</span>54</div>
         <div class="act-unit">Kilómetros</div>
         <div class="act-meta">
-          <div class="act-meta-item">⏱️ 1:52:30</div>
-          <div class="act-meta-item">⚡ 10'41"/km</div>
-          <div class="act-meta-item">🔥 1,257 kcal</div>
+          <div class="act-meta-item">1:52:30</div>
+          <div class="act-meta-item">10'41"/km</div>
+          <div class="act-meta-item">1,257 kcal</div>
         </div>
       </div>
     </div>
     <div class="act-card">
       <div class="act-card-hdr" style="background:linear-gradient(135deg,#6C5CE7,#a29bfe)">
-        <div class="act-card-type">🏃 Carrera Sabatina</div>
+        <div class="act-card-type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg> Carrera Sabatina</div>
         <div class="act-card-date">Hace 2 días</div>
       </div>
       <div class="act-card-body">
         <div class="act-km">12<span style="font-size:30px">,</span>86</div>
         <div class="act-unit">Kilómetros</div>
         <div class="act-meta">
-          <div class="act-meta-item">⏱️ 1:08:14</div>
-          <div class="act-meta-item">⚡ 5'18"/km</div>
-          <div class="act-meta-item">🔥 890 kcal</div>
+          <div class="act-meta-item">1:08:14</div>
+          <div class="act-meta-item">5'18"/km</div>
+          <div class="act-meta-item">890 kcal</div>
         </div>
       </div>
     </div>
@@ -840,43 +892,43 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     </div>
 
     <div class="section-hdr">
-      <div class="section-title">🎯 Récords Personales</div>
+      <div class="section-title">Récords Personales</div>
     </div>
     <div class="records-row">
       <div class="rec-card">
-        <div class="rec-icon">📍</div>
+        <div class="rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
         <div class="rec-val">21.1</div>
         <div class="rec-lbl">Mayor distancia (KM)</div>
       </div>
       <div class="rec-card">
-        <div class="rec-icon">⚡</div>
+        <div class="rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="rec-val">5'12"</div>
         <div class="rec-lbl">Mejor pace 5K</div>
       </div>
       <div class="rec-card">
-        <div class="rec-icon">⏳</div>
+        <div class="rec-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 00-.586-1.414L12 12l-4.414 4.414A2 2 0 007 17.828V22M7 2v4.172a2 2 0 00.586 1.414L12 12l4.414-4.414A2 2 0 0017 6.172V2"/></svg></div>
         <div class="rec-val">2h 34'</div>
         <div class="rec-lbl">Mayor tiempo</div>
       </div>
     </div>
 
     <div class="section-hdr">
-      <div class="section-title">🏆 Logros</div>
+      <div class="section-title">Logros</div>
       <div class="see-all">8/16</div>
     </div>
     <div class="badges-grid">
-      <div class="badge"><div class="badge-icon">🌱</div><div class="badge-name">Primer Km</div></div>
-      <div class="badge"><div class="badge-icon">🏃</div><div class="badge-name">5K Club</div></div>
-      <div class="badge"><div class="badge-icon">⚡</div><div class="badge-name">10K Club</div></div>
-      <div class="badge"><div class="badge-icon">🔥</div><div class="badge-name">Racha 7d</div></div>
-      <div class="badge"><div class="badge-icon">🌙</div><div class="badge-name">Nocturno</div></div>
-      <div class="badge"><div class="badge-icon">☀️</div><div class="badge-name">Madrugador</div></div>
-      <div class="badge"><div class="badge-icon">💯</div><div class="badge-name">100 KM</div></div>
-      <div class="badge"><div class="badge-icon">🌍</div><div class="badge-name">Explorador</div></div>
-      <div class="badge locked"><div class="badge-icon">🦅</div><div class="badge-name">Medio Maratón</div></div>
-      <div class="badge locked"><div class="badge-icon">👑</div><div class="badge-name">Elite</div></div>
-      <div class="badge locked"><div class="badge-icon">🏔️</div><div class="badge-name">Montañero</div></div>
-      <div class="badge locked"><div class="badge-icon">💎</div><div class="badge-name">500 KM</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M7 20s4-6 8-8-4-8-4-8-8 4-8 8 4 8 4 8"/><path d="M7 20l4-4"/></svg></div><div class="badge-name">Primer Km</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg></div><div class="badge-name">5K Club</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="badge-name">10K Club</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></div><div class="badge-name">Racha 7d</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--pu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="badge-name">Nocturno</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div><div class="badge-name">Madrugador</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="badge-name">100 KM</div></div>
+      <div class="badge"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div><div class="badge-name">Explorador</div></div>
+      <div class="badge locked"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div><div class="badge-name">Medio Maratón</div></div>
+      <div class="badge locked"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="badge-name">Elite</div></div>
+      <div class="badge locked"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M8 3l4 8 5-5 5 15H2L8 3z"/></svg></div><div class="badge-name">Montañero</div></div>
+      <div class="badge locked"><div class="badge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M6 3h12l4 6-10 13L2 9z"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="badge-name">500 KM</div></div>
     </div>
     <div style="height:16px"></div>
   </div>
@@ -907,13 +959,11 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 <!-- ===== RUN OVERLAY ===== -->
 <div id="runOv">
   <div class="ro-map">
-    <div class="ro-map-bg"></div>
-    <canvas id="routeCanvas"></canvas>
+    <div id="runOvMap"></div>
     <div class="ro-top">
-      <div class="ro-type-badge" id="roBadge">🏃 CORRIENDO</div>
+      <div class="ro-type-badge" id="roBadge">CORRIENDO</div>
       <div class="ro-time-badge" id="roTime">00:00:00</div>
     </div>
-    <div id="gpsDot" class="ro-gps-dot" style="left:50%;top:50%"></div>
   </div>
   <div class="ro-stats">
     <div class="ro-zone-bar"><div class="ro-zone-indicator" id="zoneIndicator" style="left:40%"></div></div>
@@ -921,36 +971,40 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     <div class="ro-km-lbl">Kilómetros</div>
     <div class="ro-metrics">
       <div class="ro-metric">
-        <div class="ro-metric-icon">⏱️</div>
+        <div class="ro-metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="ro-metric-val" id="roTimeMin">00:00</div>
         <div class="ro-metric-lbl">Tiempo</div>
       </div>
       <div class="ro-metric">
-        <div class="ro-metric-icon">⚡</div>
+        <div class="ro-metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="ro-metric-val" id="roPace">--'--"</div>
         <div class="ro-metric-lbl">Pace</div>
       </div>
       <div class="ro-metric">
-        <div class="ro-metric-icon">❤️</div>
+        <div class="ro-metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
         <div class="ro-metric-val" id="roHR">---</div>
         <div class="ro-metric-lbl">FC (bpm)</div>
       </div>
       <div class="ro-metric">
-        <div class="ro-metric-icon">🔥</div>
+        <div class="ro-metric-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></div>
         <div class="ro-metric-val" id="roCal">0</div>
         <div class="ro-metric-lbl">Kcal</div>
       </div>
     </div>
     <div class="ro-controls">
-      <button class="ro-pause-btn" id="pauseBtn" onclick="togglePause()">⏸️</button>
-      <button class="ro-stop-btn" onclick="stopRun()">⏹️</button>
+      <button class="ro-pause-btn" id="pauseBtn" onclick="togglePause()">
+        <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="ro-stop-btn" onclick="stopRun()">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="30" height="30"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+      </button>
     </div>
   </div>
 </div>
 
 <!-- ===== POST RUN ===== -->
 <div id="postRunOv">
-  <div class="pr-emoji">🎉</div>
+  <div class="pr-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="52" height="52"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
   <div class="pr-title">¡COMPLETADO!</div>
   <div class="pr-sub">Gran trabajo, Carlos</div>
   <div class="pr-big-km" id="prKm">0.00</div>
@@ -969,15 +1023,18 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
       <div class="pr-metric-lbl">Kcal</div>
     </div>
   </div>
-  <button class="pr-save-btn" onclick="saveRun()">💾 Guardar Carrera</button>
+  <button class="pr-save-btn" onclick="saveRun()" style="display:flex;align-items:center;gap:10px;margin:0 auto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Guardar Carrera
+  </button>
   <div class="pr-dismiss" onclick="dismissPostRun()">Descartar</div>
 </div>
 
 <!-- ===== PROFILE OVERLAY ===== -->
 <div id="profileOv">
   <div class="prof-header" style="position:relative">
-    <button class="prof-close" onclick="closeProfile()">←</button>
-    <div class="prof-av">🧑‍🦱</div>
+    <button class="prof-close" onclick="closeProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="prof-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="42" height="42"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
     <div class="prof-name">Carlos Martínez</div>
     <div class="prof-handle">@carlos.runs · Miembro desde Ene 2024</div>
     <div class="prof-stats-row">
@@ -999,7 +1056,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
     <div style="font-size:13px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Historial de carreras</div>
     <div id="runHistoryList">
       <div class="rhi">
-        <div class="rhi-icon" style="background:rgba(9,132,227,.15)">🏃</div>
+        <div class="rhi-icon" style="background:rgba(9,132,227,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg></div>
         <div class="rhi-info">
           <div class="rhi-title">Carrera del Lunes</div>
           <div class="rhi-meta">44:58 · 7'09"/km · 568 kcal</div>
@@ -1007,7 +1064,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
         <div class="rhi-km">6.27 km</div>
       </div>
       <div class="rhi">
-        <div class="rhi-icon" style="background:rgba(0,184,148,.15)">🚶</div>
+        <div class="rhi-icon" style="background:rgba(0,184,148,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="5" r="2"/><path d="M9 20l1-7 2 2 3-5"/><path d="M8 14l-2 6m9-6l2 6"/></svg></div>
         <div class="rhi-info">
           <div class="rhi-title">Caminata Dominical</div>
           <div class="rhi-meta">1:52:30 · 10'41"/km · 1,257 kcal</div>
@@ -1015,7 +1072,7 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
         <div class="rhi-km">10.54 km</div>
       </div>
       <div class="rhi">
-        <div class="rhi-icon" style="background:rgba(108,92,231,.15)">🏃</div>
+        <div class="rhi-icon" style="background:rgba(108,92,231,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--pu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg></div>
         <div class="rhi-info">
           <div class="rhi-title">Carrera Sabatina</div>
           <div class="rhi-meta">1:08:14 · 5'18"/km · 890 kcal</div>
@@ -1047,6 +1104,11 @@ const S = {
 let watchId = null, timerInterval = null, simInterval = null;
 let simLat = 40.4168, simLng = -3.7038, simAngle = 0;
 let charts = {};
+let runMap = null, runMapMarker = null;
+let runOvMap = null, runOvMarker = null, runOvPolyline = null;
+const DARK_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const LIGHT_TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>';
 
 // ===== NAVIGATION =====
 function showTab(id) {
@@ -1057,11 +1119,40 @@ function showTab(id) {
   if (nb) nb.classList.add('active');
   if (id === 'progress') setTimeout(() => initCharts(), 100);
   if (id === 'home') setTimeout(() => initWeekChart(), 100);
+  if (id === 'run') setTimeout(() => initRunMapBg(), 150);
+}
+
+// ===== DARK MODE =====
+function getTileUrl() {
+  return document.documentElement.classList.contains('light') ? LIGHT_TILES : DARK_TILES;
+}
+function toggleDarkMode() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('straider_theme', isLight ? 'light' : 'dark');
+  updateDmIcon(isLight);
+  updateMapTiles();
+}
+function updateDmIcon(isLight) {
+  const icon = document.getElementById('dmIcon');
+  if (!icon) return;
+  icon.innerHTML = isLight
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+function updateMapTiles() {
+  const url = getTileUrl();
+  [runMap, runOvMap].forEach(map => {
+    if (!map) return;
+    map.eachLayer(layer => { if (layer instanceof L.TileLayer) map.removeLayer(layer); });
+    L.tileLayer(url, { maxZoom: 19, attribution: TILE_ATTR }).addTo(map);
+  });
 }
 
 // ===== SPLASH =====
 function enterApp() {
   document.getElementById('splash').classList.add('gone');
+  const theme = localStorage.getItem('straider_theme');
+  if (theme === 'light') { document.documentElement.classList.add('light'); updateDmIcon(true); }
   loadFromStorage();
   setTimeout(() => initWeekChart(), 200);
 }
@@ -1071,7 +1162,7 @@ function setMode(m) {
   S.mode = m;
   document.getElementById('modeRun').classList.toggle('active', m === 'run');
   document.getElementById('modeWalk').classList.toggle('active', m === 'walk');
-  document.getElementById('roBadge').textContent = m === 'run' ? '🏃 CORRIENDO' : '🚶 CAMINANDO';
+  document.getElementById('roBadge').textContent = m === 'run' ? 'CORRIENDO' : 'CAMINANDO';
 }
 
 // ===== GPS =====
@@ -1132,7 +1223,7 @@ function checkKmSplit() {
   const currKm = Math.floor(S.runData.distance);
   if (currKm > prevKm) {
     S.runData.splits.push({ km: currKm, pace: S.runData.pace });
-    showToast('⚡ Km ' + currKm + ' — ' + formatPace(S.runData.pace));
+    showToast('Km ' + currKm + ' — ' + formatPace(S.runData.pace));
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
   }
 }
@@ -1175,19 +1266,22 @@ function startRun() {
   S.running = true; S.paused = false;
   S.runData = { startTime:0, elapsed:0, distance:0, pace:0, calories:0, bpm:S.mode==='run'?130:105, cadence:160, coords:[], splits:[] };
   document.getElementById('runOv').classList.add('active');
-  resizeCanvas();
+  setTimeout(() => initRunOvMap(), 150);
   startGPS();
   startTimer();
-  showToast(S.mode === 'run' ? '🏃 ¡Carrera iniciada!' : '🚶 ¡Caminata iniciada!');
+  showToast(S.mode === 'run' ? 'Carrera iniciada' : 'Caminata iniciada');
 }
 
 function togglePause() {
   S.paused = !S.paused;
-  document.getElementById('pauseBtn').textContent = S.paused ? '▶️' : '⏸️';
-  if (!S.paused) {
-    S.runData.startTime = Date.now() - S.runData.elapsed * 1000;
+  const icon = document.getElementById('pauseIcon');
+  if (icon) {
+    icon.innerHTML = S.paused
+      ? '<polygon points="5 3 19 12 5 21 5 3"/>'
+      : '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
   }
-  showToast(S.paused ? '⏸️ En pausa' : '▶️ Reanudando...');
+  if (!S.paused) S.runData.startTime = Date.now() - S.runData.elapsed * 1000;
+  showToast(S.paused ? 'En pausa' : 'Reanudando...');
 }
 
 function stopRun() {
@@ -1195,6 +1289,8 @@ function stopRun() {
   stopGPS();
   clearInterval(timerInterval); timerInterval = null;
   document.getElementById('runOv').classList.remove('active');
+  // Reset run overlay map for next run
+  if (runOvMap) { runOvMap.remove(); runOvMap = null; runOvMarker = null; runOvPolyline = null; }
   // Show post-run
   document.getElementById('prKm').textContent = S.runData.distance.toFixed(2);
   document.getElementById('prTime').textContent = formatTime(S.runData.elapsed, true);
@@ -1225,7 +1321,7 @@ function saveRun() {
   updateHomeStats();
   dismissPostRun();
   checkAchievements(run);
-  showToast('✅ Carrera guardada · ' + run.distance + ' km');
+  showToast('Carrera guardada · ' + run.distance + ' km');
   addRunToHistoryUI(run);
 }
 
@@ -1233,73 +1329,63 @@ function dismissPostRun() {
   document.getElementById('postRunOv').classList.remove('active');
 }
 
-// ===== CANVAS ROUTE =====
-function resizeCanvas() {
-  const canvas = document.getElementById('routeCanvas');
-  const parent = canvas.parentElement;
-  canvas.width = parent.offsetWidth;
-  canvas.height = parent.offsetHeight;
-  drawRoute();
+// ===== LEAFLET MAPS =====
+function initRunMapBg() {
+  const el = document.getElementById('runMapBg');
+  if (!el || typeof L === 'undefined') return;
+  if (runMap) { setTimeout(() => runMap.invalidateSize(), 100); return; }
+  runMap = L.map('runMapBg', {
+    zoomControl: false, attributionControl: true,
+    dragging: true, touchZoom: true, scrollWheelZoom: false, doubleClickZoom: false,
+  }).setView([40.4168, -3.7038], 15);
+  L.tileLayer(getTileUrl(), { maxZoom: 19, attribution: TILE_ATTR }).addTo(runMap);
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      runMap.setView([lat, lng], 16);
+      if (runMapMarker) runMap.removeLayer(runMapMarker);
+      runMapMarker = L.circleMarker([lat, lng], {
+        radius: 10, fillColor: '#FF5722', fillOpacity: 1, color: '#fff', weight: 3,
+      }).addTo(runMap);
+    }, () => {});
+  }
+}
+
+function initRunOvMap() {
+  const el = document.getElementById('runOvMap');
+  if (!el || typeof L === 'undefined') return;
+  if (runOvMap) { setTimeout(() => runOvMap.invalidateSize(), 100); return; }
+  const center = S.runData.coords.length
+    ? [S.runData.coords[0].lat, S.runData.coords[0].lng]
+    : [simLat, simLng];
+  runOvMap = L.map('runOvMap', {
+    zoomControl: false, attributionControl: false,
+    dragging: false, touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false,
+  }).setView(center, 17);
+  L.tileLayer(getTileUrl(), { maxZoom: 19 }).addTo(runOvMap);
+  runOvPolyline = L.polyline([], { color: '#FF5722', weight: 5, opacity: 0.9 }).addTo(runOvMap);
 }
 
 function drawRoute() {
-  const canvas = document.getElementById('routeCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-
-  // Dark bg
-  ctx.fillStyle = '#0d0d14';
-  ctx.fillRect(0, 0, W, H);
-
-  // Map grid
-  ctx.strokeStyle = 'rgba(108,92,231,0.07)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 32) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y = 0; y < H; y += 32) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // City blocks
-  ctx.fillStyle = 'rgba(26,26,42,0.7)';
-  const blocks = [[40,80,100,60],[200,60,80,90],[40,200,120,70],[200,180,90,80],[140,280,100,60],[310,120,70,80],[60,320,80,50],[280,280,80,60]];
-  blocks.forEach(([x,y,w,h]) => {
-    if (x < W && y < H) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x,y,w,h,4) : ctx.rect(x,y,w,h); ctx.fill(); }
-  });
-
   const coords = S.runData.coords;
-  if (coords.length < 2) {
-    // Show center dot even without route
-    const dot = document.getElementById('gpsDot');
-    if (dot) { dot.style.left = (W/2) + 'px'; dot.style.top = (H/2) + 'px'; }
-    return;
+  if (!coords.length || !runOvMap) return;
+  const latLngs = coords.map(c => [c.lat, c.lng]);
+  if (runOvPolyline) runOvPolyline.setLatLngs(latLngs);
+  const last = coords[coords.length - 1];
+  if (!runOvMarker) {
+    runOvMarker = L.circleMarker([last.lat, last.lng], {
+      radius: 10, fillColor: '#FF5722', fillOpacity: 1, color: '#fff', weight: 3,
+    }).addTo(runOvMap);
+  } else {
+    runOvMarker.setLatLng([last.lat, last.lng]);
   }
+  if (coords.length > 1) runOvMap.panTo([last.lat, last.lng], { animate: true, duration: 0.5 });
+}
 
-  const lats = coords.map(c => c.lat), lngs = coords.map(c => c.lng);
-  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-  const latR = maxLat - minLat || 0.0005, lngR = maxLng - minLng || 0.0005;
-  const pad = 60;
-  const toX = lng => pad + ((lng - minLng) / lngR) * (W - 2*pad);
-  const toY = lat => H - pad - ((lat - minLat) / latR) * (H - 2*pad);
-
-  // Glow
-  ctx.strokeStyle = 'rgba(255,87,34,0.2)';
-  ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath();
-  coords.forEach((c,i) => i===0 ? ctx.moveTo(toX(c.lng),toY(c.lat)) : ctx.lineTo(toX(c.lng),toY(c.lat)));
-  ctx.stroke();
-  // Main line
-  ctx.strokeStyle = '#FF5722'; ctx.lineWidth = 3;
-  ctx.beginPath();
-  coords.forEach((c,i) => i===0 ? ctx.moveTo(toX(c.lng),toY(c.lat)) : ctx.lineTo(toX(c.lng),toY(c.lat)));
-  ctx.stroke();
-  // Start dot
-  ctx.fillStyle = '#fff'; ctx.beginPath();
-  ctx.arc(toX(coords[0].lng), toY(coords[0].lat), 5, 0, Math.PI*2); ctx.fill();
-  // GPS dot
-  const last = coords[coords.length-1];
-  const dot = document.getElementById('gpsDot');
-  if (dot) { dot.style.left = toX(last.lng) + 'px'; dot.style.top = toY(last.lat) + 'px'; }
+function resizeCanvas() {
+  setTimeout(() => {
+    if (runOvMap) runOvMap.invalidateSize();
+  }, 100);
 }
 
 // ===== CHARTS =====
@@ -1388,14 +1474,17 @@ function updateHomeStats() {
 }
 
 function addRunToHistoryUI(run) {
-  const icons = { run: '🏃', walk: '🚶' };
+  const svgs = {
+    run: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg>',
+    walk: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="5" r="2"/><path d="M9 20l1-7 2 2 3-5"/><path d="M8 14l-2 6m9-6l2 6"/></svg>',
+  };
   const colors = { run: 'rgba(9,132,227,.15)', walk: 'rgba(0,184,148,.15)' };
   const list = document.getElementById('runHistoryList');
   if (!list) return;
   const div = document.createElement('div');
   div.className = 'rhi';
   div.innerHTML = `
-    <div class="rhi-icon" style="background:${colors[run.type]}">${icons[run.type]}</div>
+    <div class="rhi-icon" style="background:${colors[run.type]}">${svgs[run.type]}</div>
     <div class="rhi-info">
       <div class="rhi-title">${run.type === 'run' ? 'Carrera' : 'Caminata'} · ${run.date}</div>
       <div class="rhi-meta">${formatTime(run.elapsed,true)} · ${formatPace(run.pace)} · ${run.calories} kcal</div>
@@ -1425,17 +1514,17 @@ function filterChallenge(btn, cat) {
 
 // ===== ACHIEVEMENTS =====
 const BADGES = [
-  { id:'first_run', name:'Primera Carrera', icon:'🌱', cond: r => r.type==='run' },
-  { id:'5k', name:'5K Club', icon:'🏃', cond: r => r.distance >= 5 },
-  { id:'10k', name:'10K Club', icon:'⚡', cond: r => r.distance >= 10 },
-  { id:'half', name:'Medio Maratón', icon:'🦅', cond: r => r.distance >= 21.0975 },
+  { id:'first_run', name:'Primera Carrera', cond: r => r.type==='run' },
+  { id:'5k', name:'5K Club', cond: r => r.distance >= 5 },
+  { id:'10k', name:'10K Club', cond: r => r.distance >= 10 },
+  { id:'half', name:'Medio Maratón', cond: r => r.distance >= 21.0975 },
 ];
 function checkAchievements(run) {
   const earned = JSON.parse(localStorage.getItem('straider_badges') || '[]');
   BADGES.forEach(b => {
     if (!earned.includes(b.id) && b.cond(run)) {
       earned.push(b.id);
-      setTimeout(() => showToast('🏆 Nuevo logro: ' + b.name + ' ' + b.icon), 1500);
+      setTimeout(() => showToast('Nuevo logro: ' + b.name), 1500);
     }
   });
   localStorage.setItem('straider_badges', JSON.stringify(earned));
