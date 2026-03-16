@@ -435,7 +435,8 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 #postRunOv{
   position:fixed;inset:0;z-index:210;display:none;
   flex-direction:column;background:var(--bg);
-  align-items:center;justify-content:center;padding:24px;text-align:center;
+  align-items:center;justify-content:flex-start;padding:48px 24px 32px;text-align:center;
+  overflow-y:auto;
 }
 #postRunOv.active{display:flex;animation:fadeUp .4s both}
 .pr-check{width:64px;height:64px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(0,184,148,.15);color:var(--gr)}
@@ -454,6 +455,11 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 }
 .pr-save-btn:active{transform:scale(.96)}
 .pr-dismiss{font-size:13px;color:var(--t3);margin-top:14px;font-weight:500;padding:8px;cursor:pointer}
+#prRouteMap{
+  width:calc(100% - 40px);height:180px;border-radius:16px;
+  margin:16px auto 0;overflow:hidden;flex-shrink:0;
+  background:var(--bg2);border:1px solid rgba(255,255,255,.06);
+}
 
 /* ===== PROFILE OVERLAY ===== */
 #profileOv{
@@ -489,6 +495,57 @@ button{background:none;border:none;color:inherit;cursor:pointer;font-family:inhe
 .rhi-title{font-size:14px;font-weight:700}
 .rhi-meta{font-size:11px;color:var(--t3);margin-top:2px;font-weight:500}
 .rhi-km{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:900;color:var(--or)}
+
+/* ===== SETTINGS OVERLAY ===== */
+#settingsOv{
+  position:fixed;inset:0;z-index:160;display:none;flex-direction:column;
+  background:var(--bg1);transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.16,1,.3,1);
+}
+#settingsOv.active{display:flex;transform:translateY(0)}
+.set-section-title{
+  font-size:11px;font-weight:800;color:var(--t3);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;
+}
+.set-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.set-row-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.set-row-info{flex:1}
+.set-row-label{font-size:14px;font-weight:700}
+.set-row-val{font-size:13px;color:var(--t3);font-weight:500;margin-top:1px}
+.set-toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+.set-toggle input{opacity:0;width:0;height:0}
+.set-toggle-track{
+  position:absolute;inset:0;border-radius:26px;
+  background:var(--bg4);cursor:pointer;transition:background .2s;
+}
+.set-toggle-track::before{
+  content:'';position:absolute;left:3px;top:3px;
+  width:20px;height:20px;border-radius:50%;background:#fff;
+  transition:transform .2s;
+}
+.set-toggle input:checked + .set-toggle-track{background:var(--or)}
+.set-toggle input:checked + .set-toggle-track::before{transform:translateX(18px)}
+.set-slider{
+  -webkit-appearance:none;width:100%;height:4px;border-radius:4px;
+  background:var(--bg4);outline:none;cursor:pointer;
+}
+.set-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--or);cursor:pointer;
+}
+
+/* ===== SETTINGS BUTTON in profile ===== */
+.prof-settings-btn{
+  position:absolute;top:54px;right:20px;
+  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+}
 
 /* ===== TOAST ===== */
 #toast{
@@ -1009,6 +1066,7 @@ html.light .rhi{border-bottom-color:rgba(0,0,0,.06)}
       <div class="pr-metric-lbl">Kcal</div>
     </div>
   </div>
+  <div id="prRouteMap"></div>
   <button class="pr-save-btn" onclick="saveRun()" style="display:flex;align-items:center;gap:10px;margin:0 auto">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
     Guardar Carrera
@@ -1020,6 +1078,7 @@ html.light .rhi{border-bottom-color:rgba(0,0,0,.06)}
 <div id="profileOv">
   <div class="prof-header" style="position:relative">
     <button class="prof-close" onclick="closeProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="prof-settings-btn" onclick="openSettings()" title="Configuracion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg></button>
     <div class="prof-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="42" height="42"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
     <div class="prof-name">Carlos Martínez</div>
     <div class="prof-handle">@carlos.runs · Miembro desde Ene 2024</div>
@@ -1066,6 +1125,83 @@ html.light .rhi{border-bottom-color:rgba(0,0,0,.06)}
         <div class="rhi-km">12.86 km</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS OVERLAY ===== -->
+<div id="settingsOv">
+  <div class="prof-header" style="position:relative">
+    <button class="prof-close" onclick="closeSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:4px">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(108,92,231,.15);display:flex;align-items:center;justify-content:center;color:var(--pu)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+      </div>
+    </div>
+    <div class="prof-name" style="font-size:22px">Configuracion</div>
+  </div>
+  <div class="prof-body">
+
+    <div class="set-section-title">Perfil</div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(9,132,227,.12);color:var(--bl)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Nombre</div><div class="set-row-val">Carlos Martinez</div></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(232,67,147,.12);color:var(--rd)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">FC Max</div><div class="set-row-val">185 bpm</div></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(253,203,110,.12);color:var(--yl)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Peso</div><div class="set-row-val">72 kg</div></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="set-section-title" style="margin-top:20px">Entrenamiento</div>
+    <div class="set-row" style="flex-wrap:wrap;gap:6px">
+      <div class="set-row-icon" style="background:rgba(0,184,148,.12);color:var(--gr)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="set-row-info" style="flex:1"><div class="set-row-label">Pace objetivo</div><div class="set-row-val" id="setPaceTarget">5'30"/km</div></div>
+      <input type="range" class="set-slider" id="paceSlider" min="4" max="10" step="0.5" value="5.5" oninput="updatePaceTarget(this.value)" style="width:100%;margin-top:4px">
+    </div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(108,92,231,.12);color:var(--pu)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Alertas de ritmo</div><div class="set-row-val" style="font-size:11px;color:var(--t3)">Avisar al salir del objetivo</div></div>
+      <label class="set-toggle"><input type="checkbox" id="paceAlerts" checked onchange="saveSetting('paceAlerts',this.checked)"><span class="set-toggle-track"></span></label>
+    </div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(255,87,34,.12);color:var(--or)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Avisos por km</div><div class="set-row-val" style="font-size:11px;color:var(--t3)">Anunciar cada kilometro</div></div>
+      <label class="set-toggle"><input type="checkbox" id="kmAlerts" checked onchange="saveSetting('kmAlerts',this.checked)"><span class="set-toggle-track"></span></label>
+    </div>
+
+    <div class="set-section-title" style="margin-top:20px">Pantalla</div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(9,132,227,.12);color:var(--bl)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Tema claro</div><div class="set-row-val" id="setThemeLabel">Apagado</div></div>
+      <label class="set-toggle"><input type="checkbox" id="themeToggle" onchange="toggleDarkModeFromSettings(this.checked)"><span class="set-toggle-track"></span></label>
+    </div>
+    <div class="set-row">
+      <div class="set-row-icon" style="background:rgba(253,203,110,.12);color:var(--yl)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Sonidos</div><div class="set-row-val" style="font-size:11px;color:var(--t3)">Efectos de audio</div></div>
+      <label class="set-toggle"><input type="checkbox" id="soundsToggle" checked onchange="saveSetting('sounds',this.checked)"><span class="set-toggle-track"></span></label>
+    </div>
+
+    <div class="set-section-title" style="margin-top:20px">Datos</div>
+    <div class="set-row" onclick="exportData()" style="cursor:pointer">
+      <div class="set-row-icon" style="background:rgba(0,184,148,.12);color:var(--gr)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Exportar datos</div><div class="set-row-val" style="font-size:11px;color:var(--t3)">Descargar historial en JSON</div></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="set-row" onclick="confirmClearData()" style="cursor:pointer">
+      <div class="set-row-icon" style="background:rgba(232,67,147,.12);color:var(--rd)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg></div>
+      <div class="set-row-info"><div class="set-row-label">Borrar datos</div><div class="set-row-val" style="font-size:11px;color:var(--rd)">Eliminar todo el historial</div></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div style="height:24px"></div>
+    <div style="text-align:center;font-size:11px;color:var(--t3);font-weight:600">Straider v1.0</div>
+    <div style="height:24px"></div>
   </div>
 </div>
 
@@ -1283,6 +1419,7 @@ function stopRun() {
   document.getElementById('prPace').textContent = S.runData.pace > 0 ? formatPace(S.runData.pace) : "--'--\"";
   document.getElementById('prCal').textContent = S.runData.calories;
   document.getElementById('postRunOv').classList.add('active');
+  setTimeout(() => initPostRunMap(), 200);
 }
 
 function saveRun() {
@@ -1313,6 +1450,7 @@ function saveRun() {
 
 function dismissPostRun() {
   document.getElementById('postRunOv').classList.remove('active');
+  if (postRunMap) { postRunMap.remove(); postRunMap = null; }
 }
 
 // ===== LEAFLET MAPS =====
@@ -1350,6 +1488,27 @@ function initRunOvMap() {
   }).setView(center, 17);
   L.tileLayer(getTileUrl(), { maxZoom: 19 }).addTo(runOvMap);
   runOvPolyline = L.polyline([], { color: '#FF5722', weight: 5, opacity: 0.9 }).addTo(runOvMap);
+}
+
+let postRunMap = null;
+function initPostRunMap() {
+  const el = document.getElementById('prRouteMap');
+  if (!el || typeof L === 'undefined') return;
+  if (postRunMap) { postRunMap.remove(); postRunMap = null; }
+  const coords = S.runData.coords;
+  const center = coords.length ? [coords[0].lat, coords[0].lng] : [simLat, simLng];
+  postRunMap = L.map('prRouteMap', {
+    zoomControl: false, attributionControl: false,
+    dragging: false, touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false,
+  }).setView(center, 15);
+  L.tileLayer(getTileUrl(), { maxZoom: 19 }).addTo(postRunMap);
+  if (coords.length > 1) {
+    const latLngs = coords.map(c => [c.lat, c.lng]);
+    L.polyline(latLngs, { color: '#FF5722', weight: 5, opacity: 0.9 }).addTo(postRunMap);
+    L.circleMarker(latLngs[0], { radius: 7, fillColor: '#00B894', fillOpacity: 1, color: '#fff', weight: 2 }).addTo(postRunMap);
+    L.circleMarker(latLngs[latLngs.length - 1], { radius: 7, fillColor: '#FF5722', fillOpacity: 1, color: '#fff', weight: 2 }).addTo(postRunMap);
+    postRunMap.fitBounds(latLngs, { padding: [20, 20] });
+  }
 }
 
 function drawRoute() {
@@ -1460,23 +1619,59 @@ function updateHomeStats() {
 }
 
 function addRunToHistoryUI(run) {
-  const svgs = {
-    run: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg>',
-    walk: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="5" r="2"/><path d="M9 20l1-7 2 2 3-5"/><path d="M8 14l-2 6m9-6l2 6"/></svg>',
-  };
-  const colors = { run: 'rgba(9,132,227,.15)', walk: 'rgba(0,184,148,.15)' };
+  const svgRun = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg>';
+  const svgWalk = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="5" r="2"/><path d="M9 20l1-7 2 2 3-5"/><path d="M8 14l-2 6m9-6l2 6"/></svg>';
+  const isRun = run.type === 'run';
+  // Profile history list
   const list = document.getElementById('runHistoryList');
-  if (!list) return;
-  const div = document.createElement('div');
-  div.className = 'rhi';
-  div.innerHTML = `
-    <div class="rhi-icon" style="background:${colors[run.type]}">${svgs[run.type]}</div>
-    <div class="rhi-info">
-      <div class="rhi-title">${run.type === 'run' ? 'Carrera' : 'Caminata'} · ${run.date}</div>
-      <div class="rhi-meta">${formatTime(run.elapsed,true)} · ${formatPace(run.pace)} · ${run.calories} kcal</div>
+  if (list) {
+    const div = document.createElement('div');
+    div.className = 'rhi';
+    div.innerHTML = `
+      <div class="rhi-icon" style="background:${isRun ? 'rgba(9,132,227,.15)' : 'rgba(0,184,148,.15)'}">${isRun ? svgRun : svgWalk}</div>
+      <div class="rhi-info">
+        <div class="rhi-title">${isRun ? 'Carrera' : 'Caminata'} &middot; ${run.date}</div>
+        <div class="rhi-meta">${formatTime(run.elapsed,true)} &middot; ${formatPace(run.pace)} &middot; ${run.calories} kcal</div>
+      </div>
+      <div class="rhi-km">${run.distance} km</div>`;
+    list.insertBefore(div, list.firstChild);
+  }
+  // Progress tab activity cards
+  addRunToProgressTab(run);
+}
+
+function addRunToProgressTab(run) {
+  const actCards = document.getElementById('actCards');
+  if (!actCards) return;
+  const isRun = run.type === 'run';
+  const gradients = [
+    'linear-gradient(135deg,#0984E3,#00B4DB)',
+    'linear-gradient(135deg,#6C5CE7,#a29bfe)',
+    'linear-gradient(135deg,#00B894,#55efc4)',
+    'linear-gradient(135deg,#FF5722,#ff8a50)',
+    'linear-gradient(135deg,#FDCB6E,#f0a500)',
+  ];
+  const grad = gradients[S.history.indexOf(run) % gradients.length] || gradients[0];
+  const svgType = isRun
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="4" r="2"/><path d="M15.5 8.5l-2-1.5-3 4-3-1.5"/><path d="M10.5 11L8 20m6-9l2 9"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="5" r="2"/><path d="M9 20l1-7 2 2 3-5"/><path d="M8 14l-2 6m9-6l2 6"/></svg>';
+  const card = document.createElement('div');
+  card.className = 'act-card';
+  card.innerHTML = `
+    <div class="act-card-hdr" style="background:${grad}">
+      <div class="act-card-type">${svgType} ${isRun ? 'Carrera' : 'Caminata'}</div>
+      <div class="act-card-date">${run.date}</div>
     </div>
-    <div class="rhi-km">${run.distance} km</div>`;
-  list.insertBefore(div, list.firstChild);
+    <div class="act-card-body">
+      <div class="act-km">${String(run.distance).replace('.',',')}</div>
+      <div class="act-unit">Kilometros</div>
+      <div class="act-meta">
+        <div class="act-meta-item">${formatTime(run.elapsed,true)}</div>
+        <div class="act-meta-item">${formatPace(run.pace)}</div>
+        <div class="act-meta-item">${run.calories} kcal</div>
+      </div>
+    </div>`;
+  actCards.insertBefore(card, actCards.firstChild);
 }
 
 // ===== PROFILE =====
@@ -1486,6 +1681,69 @@ function openProfile() {
 }
 function closeProfile() {
   document.getElementById('profileOv').classList.remove('active');
+}
+
+// ===== SETTINGS =====
+function openSettings() {
+  const ov = document.getElementById('settingsOv');
+  ov.classList.add('active');
+  // Sync theme toggle
+  const isLight = document.documentElement.classList.contains('light');
+  document.getElementById('themeToggle').checked = isLight;
+  document.getElementById('setThemeLabel').textContent = isLight ? 'Encendido' : 'Apagado';
+  // Load saved settings
+  const prefs = JSON.parse(localStorage.getItem('straider_prefs') || '{}');
+  if (prefs.paceTarget) updatePaceTarget(prefs.paceTarget, true);
+  if (prefs.kmAlerts !== undefined) document.getElementById('kmAlerts').checked = prefs.kmAlerts;
+  if (prefs.sounds !== undefined) document.getElementById('soundsToggle').checked = prefs.sounds;
+}
+function closeSettings() {
+  document.getElementById('settingsOv').classList.remove('active');
+}
+function saveSetting(key, val) {
+  const prefs = JSON.parse(localStorage.getItem('straider_prefs') || '{}');
+  prefs[key] = val;
+  localStorage.setItem('straider_prefs', JSON.stringify(prefs));
+}
+function updatePaceTarget(val, silent) {
+  const m = Math.floor(val);
+  const s = Math.round((val - m) * 60);
+  const label = m + "'" + pad(s) + '"/km';
+  document.getElementById('setPaceTarget').textContent = label;
+  document.getElementById('paceSlider').value = val;
+  if (!silent) saveSetting('paceTarget', val);
+}
+function toggleDarkModeFromSettings(isLight) {
+  document.documentElement.classList.toggle('light', isLight);
+  updateDmIcon(isLight);
+  localStorage.setItem('straider_theme', isLight ? 'light' : 'dark');
+  updateMapTiles();
+  document.getElementById('setThemeLabel').textContent = isLight ? 'Encendido' : 'Apagado';
+}
+function exportData() {
+  const data = {
+    runs: S.history,
+    stats: { todayKm: S.todayKm, streak: S.streak, monthKm: S.monthKm, totalRuns: S.totalRuns },
+    exported: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'straider-data.json';
+  a.click();
+  showToast('Datos exportados');
+}
+function confirmClearData() {
+  if (confirm('Eliminar todo el historial de carreras?')) {
+    localStorage.removeItem('straider_runs');
+    localStorage.removeItem('straider_stats');
+    S.history = [];
+    S.todayKm = 0; S.todayRuns = 0; S.todayCal = 0;
+    S.streak = 0; S.monthKm = 0; S.totalRuns = 0;
+    updateHomeStats();
+    showToast('Datos eliminados');
+    closeSettings();
+  }
 }
 
 // ===== CHALLENGES =====
@@ -1542,13 +1800,13 @@ function loadFromStorage() {
     S.totalRuns = d.totalRuns || 28;
   }
   updateHomeStats();
-  // Load saved runs into profile
+  // Load saved runs into profile and progress tab
   if (S.history.length > 0) {
     const list = document.getElementById('runHistoryList');
-    if (list && S.history.length > 0) {
-      list.innerHTML = '';
-      S.history.slice(0, 10).forEach(addRunToHistoryUI);
-    }
+    if (list) list.innerHTML = '';
+    const actCards = document.getElementById('actCards');
+    if (actCards) actCards.innerHTML = '';
+    S.history.slice(0, 10).forEach(addRunToHistoryUI);
   }
 }
 
