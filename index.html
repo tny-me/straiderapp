@@ -177,6 +177,7 @@
 
   /* Programas */
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
   .card{
     background:var(--white);
     border:1px solid var(--paper-2);
@@ -252,10 +253,19 @@
     color:var(--navy-800);margin-bottom:10px;
   }
   .notice p{font-size:0.94rem;color:#42597a;margin-bottom:16px;}
+  .notice p a{color:var(--cyan-dim);font-weight:600;}
+
+  /* Consultoría */
+  .consult-cta{
+    margin-top:36px;padding-top:28px;
+    border-top:1px solid var(--paper-2);
+    display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+  }
+  .consult-cta p{color:#3D5470;font-size:0.94rem;max-width:460px;}
 
   /* Contacto */
   .contact{background:var(--white);}
-  .contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .contact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
   .channel{
     border:1px solid var(--paper-2);
     padding:24px;
@@ -318,13 +328,14 @@
 
   /* ============ RESPONSIVE ============ */
   @media (max-width:900px){
-    .grid-3,.contact-grid{grid-template-columns:1fr;}
+    .grid-3,.grid-2{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr 1fr;}
     .steps{grid-template-columns:1fr 1fr;}
     .elig-grid{grid-template-columns:1fr;}
     .agency-id h1{font-size:1.45rem;}
   }
   @media (max-width:540px){
-    .steps{grid-template-columns:1fr;}
+    .steps,.contact-grid{grid-template-columns:1fr;}
     section{padding:52px 20px;}
   }
   @media (prefers-reduced-motion:reduce){
@@ -351,7 +362,9 @@
   <nav aria-label="Navegación principal">
     <div class="nav-inner">
       <a href="#mision">Misión</a>
+      <a href="#vision">Visión</a>
       <a href="#programas">Programas</a>
+      <a href="#consultoria">Consultoría</a>
       <a href="#operacion">Cómo operamos</a>
       <a href="#elegibilidad">Elegibilidad</a>
       <a href="#contacto">Contacto</a>
@@ -372,16 +385,39 @@
     <div class="hero-actions">
       <a class="btn btn-primary" href="#elegibilidad">Solicitar asistencia</a>
       <a class="btn btn-ghost" href="#programas">Ver programas</a>
+      <a class="btn btn-ghost" href="#consultoria">Consultoría para empresas</a>
     </div>
   </div>
 </section>
 
+<!-- MISIÓN Y VISIÓN -->
+<section id="vision">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="code">SECCIÓN 02 // RAZÓN DE SER</div>
+      <h3>Por qué existe la NSA</h3>
+      <p>Dos ideas simples sostienen todo lo que hacemos: a quién servimos, y qué mundo digital queremos construir.</p>
+    </div>
+    <div class="grid-2">
+      <article class="card">
+        <div class="prog-code">NSA-MV1 · Misión</div>
+        <h4>Democratizar el acceso a infraestructura digital segura</h4>
+        <p>Ninguna persona, comunidad u organización civil debería quedar desprotegida solo porque no puede pagar lo que hoy cobra la industria. Construimos y protegemos esa infraestructura donde el mercado no llega, sin letra pequeña y sin cobrar de más a quien menos tiene.</p>
+      </article>
+      <article class="card">
+        <div class="prog-code">NSA-MV2 · Visión</div>
+        <h4>Un estándar garantizado, no un lujo</h4>
+        <p>Un futuro donde la seguridad digital de calidad sea un mínimo garantizado, no un privilegio reservado a quien puede pagar tarifas abusivas. Que ninguna comunidad, fundación o empresa pequeña tenga que elegir entre operar sin protección o pagar precios que no puede sostener.</p>
+      </article>
+    </div>
+  </div>
+</section>
 
 <!-- PROGRAMAS -->
 <section id="programas">
   <div class="section-inner">
     <div class="section-head">
-      <div class="code">SECCIÓN 02 // LÍNEAS DE PROGRAMA</div>
+      <div class="code">SECCIÓN 03 // LÍNEAS DE PROGRAMA</div>
       <h3>Programas operativos</h3>
       <p>Tres líneas de acción cubren el ciclo completo del acceso: crear la cobertura digital que falta, proteger la que ya existe y capacitar a quien la va a usar.</p>
     </div>
@@ -405,11 +441,38 @@
   </div>
 </section>
 
+<!-- CONSULTORÍA -->
+<section id="consultoria">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="code">SECCIÓN 04 // SERVICIO PROFESIONAL</div>
+      <h3>Consultoría NSA</h3>
+      <p>Para empresas y organizaciones que sí pueden invertir en su seguridad e infraestructura. Es el único servicio de pago que ofrecemos, y cada consultoría contratada financia directamente los programas gratuitos de esta sección para quien no puede pagarlos.</p>
+    </div>
+    <div class="grid-2">
+      <article class="card">
+        <div class="prog-code">NSA-C1 · Auditoría</div>
+        <h4>Consultoría en ciberseguridad</h4>
+        <p>Evaluamos la seguridad real de tus sistemas actuales: vulnerabilidades, exposición de datos, respaldo y respuesta ante incidentes. Entregamos hallazgos claros y un plan de acción — sin venderte pánico ni contratos eternos.</p>
+      </article>
+      <article class="card">
+        <div class="prog-code">NSA-C2 · Estrategia</div>
+        <h4>Consultoría en infraestructura y sistemas</h4>
+        <p>Te ayudamos a decidir qué construir, qué adoptar y qué evitar: arquitectura, plataformas, herramientas y proveedores, con criterio técnico independiente — no comisión por venderte de más.</p>
+      </article>
+    </div>
+    <div class="consult-cta">
+      <p>Tarifas justas, claras desde la primera conversación. Sin cobros ocultos, sin contratos abusivos.</p>
+      <a class="btn btn-primary" href="mailto:consultoria@nuxiens.org">Agendar consultoría</a>
+    </div>
+  </div>
+</section>
+
 <!-- CÓMO OPERAMOS -->
 <section class="ops" id="operacion">
   <div class="section-inner">
     <div class="section-head">
-      <div class="code">SECCIÓN 03 // PROTOCOLO DE ASISTENCIA</div>
+      <div class="code">SECCIÓN 05 // PROTOCOLO DE ASISTENCIA</div>
       <h3>Cómo operamos</h3>
       <p>Todo caso sigue el mismo protocolo de cuatro fases, sin excepciones. La confidencialidad del beneficiario se mantiene en todas ellas.</p>
     </div>
@@ -444,7 +507,7 @@
     <div class="elig-grid">
       <div>
         <div class="section-head" style="margin-bottom:18px;">
-          <div class="code">SECCIÓN 04 // CRITERIOS</div>
+          <div class="code">SECCIÓN 06 // CRITERIOS</div>
           <h3>¿Quién puede solicitar?</h3>
         </div>
         <ul>
@@ -457,7 +520,7 @@
       <aside class="notice">
         <div class="n-head">Aviso NSA-A1</div>
         <h5>Servicio sin costo, sin condiciones comerciales</h5>
-        <p>la agencia no cobra a sus beneficiarios, no vende sus datos y no condiciona la asistencia a ninguna contraprestación. Los casos se priorizan por nivel de riesgo y urgencia.</p>
+        <p>la agencia no cobra a sus beneficiarios, no vende sus datos y no condiciona la asistencia a ninguna contraprestación. Los casos se priorizan por nivel de riesgo y urgencia. La única excepción es nuestra <a href="#consultoria">Consultoría</a> para empresas, cuyo ingreso financia estos programas gratuitos.</p>
         <a class="btn btn-primary" href="#contacto">Iniciar solicitud</a>
       </aside>
     </div>
@@ -468,7 +531,7 @@
 <section class="contact" id="contacto">
   <div class="section-inner">
     <div class="section-head">
-      <div class="code">SECCIÓN 05 // CANALES OFICIALES</div>
+      <div class="code">SECCIÓN 07 // CANALES OFICIALES</div>
       <h3>Contacto</h3>
       <p>Usa el canal que corresponda a tu situación. Si tu caso es urgente o sensible, indícalo desde el primer mensaje.</p>
     </div>
@@ -481,12 +544,18 @@
       </div>
       <div class="channel">
         <div class="ch-code">CANAL-02</div>
+        <h5>Consultoría para empresas</h5>
+        <p>Para agendar auditorías de seguridad o consultoría de infraestructura de pago.</p>
+        <p><a href="mailto:consultoria@nuxiens.org">consultoria@nuxiens.org</a></p>
+      </div>
+      <div class="channel">
+        <div class="ch-code">CANAL-03</div>
         <h5>Voluntariado técnico</h5>
         <p>Para profesionales que quieren aportar horas de ingeniería, seguridad o soporte.</p>
         <p><a href="mailto:voluntarios@nuxiens.org">voluntarios@nuxiens.org</a></p>
       </div>
       <div class="channel">
-        <div class="ch-code">CANAL-03</div>
+        <div class="ch-code">CANAL-04</div>
         <h5>Alianzas y donaciones</h5>
         <p>Para organizaciones e individuos que desean financiar la misión.</p>
         <p><a href="mailto:alianzas@nuxiens.org">alianzas@nuxiens.org</a></p>
@@ -506,12 +575,14 @@
       <div>
         <h6>Agencia</h6>
         <a href="#mision">Misión</a>
+        <a href="#vision">Visión</a>
         <a href="#programas">Programas</a>
         <a href="#operacion">Protocolo</a>
       </div>
       <div>
         <h6>Participa</h6>
         <a href="#elegibilidad">Solicitar asistencia</a>
+        <a href="#consultoria">Consultoría</a>
         <a href="#contacto">Voluntariado</a>
         <a href="#contacto">Donaciones</a>
       </div>
