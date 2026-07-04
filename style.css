@@ -222,25 +222,6 @@ header{
 .btn-ghost{border:1.5px solid var(--line-soft);color:var(--steel);}
 .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);}
 
-/* ============ FRANJA DE CREDENCIALES ============ */
-.stats-strip{background:var(--void-2);border-bottom:1px solid var(--line);}
-.stats-inner{
-  max-width:1180px;margin:0 auto;padding:26px 24px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
-}
-.stat{text-align:center;border-left:1px solid var(--line);}
-.stat:first-child{border-left:none;}
-.stat-num{
-  display:block;font-family:'Saira Condensed',sans-serif;
-  font-weight:700;font-size:1.9rem;color:var(--cyan);
-  letter-spacing:.02em;line-height:1.1;
-}
-.stat-label{
-  display:block;font-family:'IBM Plex Mono',monospace;
-  font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--steel);margin-top:4px;
-}
-
 /* ============ SECCIONES ============ */
 section{padding:72px 24px;}
 .section-inner{max-width:1180px;margin:0 auto;position:relative;}
@@ -451,8 +432,6 @@ footer{
   .contact-grid{grid-template-columns:1fr 1fr;}
   .steps{grid-template-columns:1fr 1fr;}
   .step::after{content:none;}
-  .stats-inner{grid-template-columns:1fr 1fr;row-gap:22px;}
-  .stat:nth-child(3){border-left:none;}
   .elig-grid{grid-template-columns:1fr;}
   .agency-id h1{font-size:1.45rem;}
   .hero-network-wrap{width:400px;height:400px;right:-80px;}
@@ -462,9 +441,6 @@ footer{
 }
 @media (max-width:540px){
   .steps,.contact-grid{grid-template-columns:1fr;}
-  .stats-inner{grid-template-columns:1fr;}
-  .stat{border-left:none;border-top:1px solid var(--line);padding-top:14px;}
-  .stat:first-child{padding-top:0;border-top:none;}
   section{padding:52px 20px;}
   .menu-btn-text{display:none;}
   .agency-id .sub{display:none;}
