@@ -27,33 +27,6 @@ body{
 }
 ::selection{background:var(--cyan);color:var(--void);}
 
-/* ============ BARRA DE ESTADO ============ */
-.status-bar{
-  background:var(--void);
-  border-bottom:1px solid var(--line);
-  color:var(--steel);
-  font-family:'IBM Plex Mono',monospace;
-  font-size:0.68rem;
-  letter-spacing:0.16em;
-  text-align:center;
-  padding:8px 12px;
-  text-transform:uppercase;
-  position:sticky;top:0;z-index:100;
-  display:flex;align-items:center;justify-content:center;gap:9px;
-}
-.status-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--status);
-  box-shadow:0 0 0 0 rgba(51,209,122,.5);
-  animation:statusPulse 2.4s ease-out infinite;
-  flex-shrink:0;
-}
-@keyframes statusPulse{
-  0%{box-shadow:0 0 0 0 rgba(51,209,122,.5);}
-  70%{box-shadow:0 0 0 7px rgba(51,209,122,0);}
-  100%{box-shadow:0 0 0 0 rgba(51,209,122,0);}
-}
-
 /* ============ HEADER ============ */
 header{
   background:var(--void);
