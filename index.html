@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nuxiens Systems Agency — Protección Digital Civil</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; connect-src 'none'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -284,6 +286,9 @@
     display:flex;gap:34px;align-items:flex-start;
     flex-wrap:wrap;padding-bottom:36px;
   }
+  .footer-inner .f-id img{
+    width:44px;height:44px;margin-bottom:12px;
+  }
   .footer-inner .f-id h6{
     font-family:'Saira Condensed',sans-serif;
     color:var(--white);font-size:1.15rem;
@@ -336,31 +341,7 @@
 <header>
   <div class="header-inner">
     <!-- Sello oficial NSA -->
-    <svg class="seal" width="86" height="86" viewBox="0 0 120 120" role="img" aria-label="Sello de Nuxiens Systems Agency">
-      <circle cx="60" cy="60" r="58" fill="#0B1F3A" stroke="#C9A24B" stroke-width="3"/>
-      <circle cx="60" cy="60" r="48" fill="none" stroke="#C9A24B" stroke-width="1"/>
-      <defs>
-        <path id="arcTop" d="M 60,60 m -42,0 a 42,42 0 1,1 84,0"/>
-        <path id="arcBot" d="M 60,60 m -42,0 a 42,42 0 1,0 84,0"/>
-      </defs>
-      <text font-family="Saira Condensed, sans-serif" font-size="10.5" font-weight="600" fill="#EFF3F7" letter-spacing="2">
-        <textPath href="#arcTop" startOffset="50%" text-anchor="middle">NUXIENS SYSTEMS</textPath>
-      </text>
-      <text font-family="Saira Condensed, sans-serif" font-size="10.5" font-weight="600" fill="#EFF3F7" letter-spacing="2">
-        <textPath href="#arcBot" startOffset="50%" text-anchor="middle">AGENCY</textPath>
-      </text>
-      <!-- Escudo con nodo digital -->
-      <path d="M60 32 L80 40 V58 C80 74 71 84 60 89 C49 84 40 74 40 58 V40 Z" fill="#122C4E" stroke="#39C6D6" stroke-width="1.6"/>
-      <circle cx="60" cy="58" r="5" fill="#39C6D6"/>
-      <line x1="60" y1="58" x2="60" y2="42" stroke="#39C6D6" stroke-width="1.4"/>
-      <line x1="60" y1="58" x2="48" y2="68" stroke="#39C6D6" stroke-width="1.4"/>
-      <line x1="60" y1="58" x2="72" y2="68" stroke="#39C6D6" stroke-width="1.4"/>
-      <circle cx="60" cy="42" r="2.6" fill="#C9A24B"/>
-      <circle cx="48" cy="68" r="2.6" fill="#C9A24B"/>
-      <circle cx="72" cy="68" r="2.6" fill="#C9A24B"/>
-      <circle cx="26" cy="60" r="1.6" fill="#C9A24B"/>
-      <circle cx="94" cy="60" r="1.6" fill="#C9A24B"/>
-    </svg>
+    <img class="seal" src="nsa-seal.png" width="86" height="86" alt="Sello de Nuxiens Systems Agency">
     <div class="agency-id">
       <div class="eyebrow">Agencia de infraestructura digital civil — NSA</div>
       <h1>Nuxiens Systems Agency</h1>
@@ -517,6 +498,7 @@
 <footer>
   <div class="footer-inner">
     <div class="f-id">
+      <img src="nsa-seal.png" alt="" width="44" height="44">
       <h6>Nuxiens Systems Agency</h6>
       <p>Agencia civil que crea cobertura digital, la protege y da acceso a quienes aún no lo tienen.</p>
     </div>
