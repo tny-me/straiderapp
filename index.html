@@ -90,7 +90,7 @@
       max-width .4s ease,column-gap .4s ease;
     overflow:hidden;
   }
-  .memo:has(.req-check:checked){grid-template-rows:auto 1fr;}
+  .memo:has(.req-check:checked,.dep-check:checked){grid-template-rows:auto 1fr;}
   .memo-main{grid-column:1;grid-row:1;min-width:0;}
   .request-pane{grid-column:1;grid-row:2;min-width:0;min-height:0;overflow:hidden;}
   .request-pane-in{
@@ -98,13 +98,16 @@
     opacity:0;transform:translateY(-6px);
     transition:opacity .3s ease .05s,transform .3s ease .05s;
   }
-  .memo:has(.req-check:checked) .request-pane-in{opacity:1;transform:translateY(0);}
+  .memo:has(.req-check:checked,.dep-check:checked) .request-pane-in{opacity:1;transform:translateY(0);}
+  .panel-request,.panel-deploys{display:none;}
+  .memo:has(.req-check:checked) .panel-request{display:block;}
+  .memo:has(.dep-check:checked) .panel-deploys{display:block;}
   @media (min-width:760px){
     /* a esta anchura el panel siempre vive en la columna 2 / fila 1;
        solo se anima el ancho de esa columna (0fr → 1fr), nunca el número de filas/columnas */
     .memo{grid-template-rows:auto;}
     .request-pane{grid-column:2;grid-row:1;}
-    .memo:has(.req-check:checked){
+    .memo:has(.req-check:checked,.dep-check:checked){
       grid-template-columns:1fr 1fr;
       column-gap:36px;max-width:960px;
     }
@@ -113,7 +116,7 @@
       border-left:1px dashed var(--paper-line);
       transform:translateX(10px);
     }
-    .memo:has(.req-check:checked) .request-pane-in{transform:translateX(0);}
+    .memo:has(.req-check:checked,.dep-check:checked) .request-pane-in{transform:translateX(0);}
   }
   .letterhead{
     display:flex;align-items:baseline;gap:12px;
@@ -201,10 +204,11 @@
   .stamp-btn:hover{background:var(--ink);color:var(--paper);}
   .stamp-btn .box{font-size:12px;line-height:1;}
 
-  /* ============ FORMULARIO DE SOLICITUD ============ */
-  .req-check{position:absolute;opacity:0;pointer-events:none;}
-  .req-label{cursor:pointer;}
-  .memo:has(.req-check:checked) .req-label.primary{
+  /* ============ FORMULARIO DE SOLICITUD Y REPORTE ============ */
+  .req-check,.dep-check{position:absolute;opacity:0;pointer-events:none;}
+  .req-label,.dep-label{cursor:pointer;}
+  .memo:has(.req-check:checked) .req-label.primary,
+  .memo:has(.dep-check:checked) .dep-label{
     animation:glowpulse .6s ease;
   }
   @keyframes glowpulse{
@@ -240,6 +244,31 @@
   .request-submit{
     align-self:flex-start;margin-top:2px;cursor:pointer;
     font:inherit;
+  }
+
+  .deploy-list{
+    display:flex;flex-direction:column;gap:9px;
+  }
+  .proj{border:1px solid var(--paper-line);}
+  .proj summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:9px 11px;
+  }
+  .proj summary::-webkit-details-marker{display:none;}
+  .proj-name{font-size:.78rem;color:var(--ink);}
+  .proj-tag{
+    font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--gray);white-space:nowrap;
+  }
+  .proj-status{
+    font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--active);white-space:nowrap;
+  }
+  .proj[open] summary{border-bottom:1px solid var(--paper-line);}
+  .proj-body{
+    padding:10px 11px 12px;
+    font-size:.76rem;line-height:1.5;color:var(--body-c);
   }
 
   .memo-foot{
@@ -283,6 +312,7 @@
 <main class="stage">
   <div class="memo">
     <input type="checkbox" id="req-check" class="req-check">
+    <input type="checkbox" id="dep-check" class="dep-check">
 
     <div class="memo-main">
       <div class="letterhead">
@@ -316,9 +346,9 @@
         <label for="req-check" class="stamp-btn primary req-label">
           <span class="box">☑</span> Solicitar despliegue
         </label>
-        <a class="stamp-btn" href="#">
+        <label for="dep-check" class="stamp-btn dep-label">
           <span class="box">☐</span> Despliegues
-        </a>
+        </label>
       </div>
 
       <div class="memo-foot">Las solicitudes se evalúan · No todas son aceptadas<span class="cursor">_</span></div>
@@ -326,30 +356,80 @@
 
     <div class="request-pane">
       <div class="request-pane-in">
-        <div class="rp-head">
-          <span class="mono">UDSG-00 / Formulario de solicitud</span>
-          <label for="req-check" class="rp-close" aria-label="Cerrar">✕</label>
+        <div class="panel-request">
+          <div class="rp-head">
+            <span class="mono">UDSG-00 / Formulario de solicitud</span>
+            <label for="req-check" class="rp-close" aria-label="Cerrar">✕</label>
+          </div>
+          <form class="request-form" action="mailto:acceso@udsg.dev" method="post" enctype="text/plain">
+            <label>Nombre
+              <input type="text" name="Nombre" required>
+            </label>
+            <label>Organización
+              <input type="text" name="Organización">
+            </label>
+            <label>Correo de contacto
+              <input type="email" name="Correo" required>
+            </label>
+            <label>Teléfono de contacto
+              <input type="tel" name="Teléfono">
+            </label>
+            <label>Propósito del despliegue
+              <textarea name="Propósito" rows="3" required></textarea>
+            </label>
+            <button type="submit" class="stamp-btn primary request-submit">
+              <span class="box">☑</span> Enviar solicitud
+            </button>
+          </form>
         </div>
-        <form class="request-form" action="mailto:acceso@udsg.dev" method="post" enctype="text/plain">
-          <label>Nombre
-            <input type="text" name="Nombre" required>
-          </label>
-          <label>Organización
-            <input type="text" name="Organización">
-          </label>
-          <label>Correo de contacto
-            <input type="email" name="Correo" required>
-          </label>
-          <label>Teléfono de contacto
-            <input type="tel" name="Teléfono">
-          </label>
-          <label>Propósito del despliegue
-            <textarea name="Propósito" rows="3" required></textarea>
-          </label>
-          <button type="submit" class="stamp-btn primary request-submit">
-            <span class="box">☑</span> Enviar solicitud
-          </button>
-        </form>
+
+        <div class="panel-deploys">
+          <div class="rp-head">
+            <span class="mono">UDSG-00 / Registro de despliegues</span>
+            <label for="dep-check" class="rp-close" aria-label="Cerrar">✕</label>
+          </div>
+          <div class="deploy-list">
+            <details class="proj">
+              <summary>
+                <span class="proj-name">Alerta temprana — Región Norte</span>
+                <span class="proj-tag">UDSG-04</span>
+                <span class="proj-status">Completado</span>
+              </summary>
+              <div class="proj-body">
+                Sistema de alerta por SMS para riesgo de inundación en zonas rurales sin
+                cobertura de datos. Desplegado en 6 días para una red de 12 comunidades.
+                Motivo: los sistemas comerciales existentes exigían meses de instalación
+                y contratos fuera del presupuesto de la comunidad.
+              </div>
+            </details>
+            <details class="proj">
+              <summary>
+                <span class="proj-name">Gestión escolar offline — Fundación educativa</span>
+                <span class="proj-tag">UDSG-03</span>
+                <span class="proj-status">Completado</span>
+              </summary>
+              <div class="proj-body">
+                Plataforma de gestión escolar que funciona sin conexión constante a
+                internet, para una red de escuelas rurales; sincroniza datos cuando hay
+                señal disponible. Motivo: el software comercial requería suscripciones
+                mensuales insostenibles para la fundación.
+              </div>
+            </details>
+            <details class="proj">
+              <summary>
+                <span class="proj-name">Red de comunicación — Búsqueda y rescate</span>
+                <span class="proj-tag">UDSG-02</span>
+                <span class="proj-status">Completado</span>
+              </summary>
+              <div class="proj-body">
+                Red de radio-relevo tipo malla más aplicación de rastreo para un equipo
+                voluntario de búsqueda y rescate en zonas sin señal celular. Motivo:
+                coordinar operaciones sin depender de infraestructura comercial de
+                telecomunicaciones.
+              </div>
+            </details>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -368,6 +448,11 @@
     document.addEventListener('contextmenu',e=>{if(!isFormField(e.target))e.preventDefault();});
     document.addEventListener('copy',e=>{if(!isFormField(e.target))e.preventDefault();});
     document.addEventListener('cut',e=>{if(!isFormField(e.target))e.preventDefault();});
+
+    const reqCheck=document.getElementById('req-check');
+    const depCheck=document.getElementById('dep-check');
+    reqCheck.addEventListener('change',()=>{if(reqCheck.checked)depCheck.checked=false;});
+    depCheck.addEventListener('change',()=>{if(depCheck.checked)reqCheck.checked=false;});
   })();
 </script>
 
