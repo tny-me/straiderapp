@@ -37,6 +37,10 @@
     overflow-x:hidden;
     min-height:100dvh;
     display:flex;flex-direction:column;
+    -webkit-user-select:none;user-select:none;
+  }
+  input,textarea{
+    -webkit-user-select:text;user-select:text;
   }
   ::selection{background:var(--ink);color:var(--paper);}
 
@@ -61,7 +65,6 @@
     content:"";position:absolute;left:0;right:0;height:4px;
     background:repeating-linear-gradient(135deg,var(--stamp) 0 8px,var(--band-bg) 8px 16px);
   }
-  .band.top::after{bottom:-4px;}
   .band.bottom::after{top:-4px;}
   .band.bottom{font-size:8px;letter-spacing:.24em;color:var(--dim);}
 
@@ -277,8 +280,6 @@
 
 <div class="grain" aria-hidden="true"></div>
 
-<div class="band top">Documento no oficial — Distribución restringida</div>
-
 <main class="stage">
   <div class="memo">
     <input type="checkbox" id="req-check" class="req-check">
@@ -295,7 +296,6 @@
         <div class="mh-row"><span class="mh-label">Ref</span><span class="mh-value mono">UDSG-00 / Declaración</span></div>
         <div class="mh-row"><span class="mh-label">Fecha</span><span class="mh-value mono" id="zulu">--:--:--Z</span></div>
         <div class="mh-row"><span class="mh-label">Estado</span><span class="mh-value"><span class="status"><span class="status-dot"></span>Activo</span></span></div>
-        <div class="mh-row"><span class="mh-label">Modo</span><span class="mh-value">Bajo demanda</span></div>
       </div>
 
       <h1>Organización de ingeniería y desarrollo tecnológico.</h1>
@@ -363,6 +363,11 @@
     const pad=n=>String(n).padStart(2,'0');
     const t=()=>{const d=new Date();z.textContent=pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+':'+pad(d.getUTCSeconds())+'Z';};
     t();setInterval(t,1000);
+
+    const isFormField=el=>el&&(el.tagName==='INPUT'||el.tagName==='TEXTAREA');
+    document.addEventListener('contextmenu',e=>{if(!isFormField(e.target))e.preventDefault();});
+    document.addEventListener('copy',e=>{if(!isFormField(e.target))e.preventDefault();});
+    document.addEventListener('cut',e=>{if(!isFormField(e.target))e.preventDefault();});
   })();
 </script>
 
