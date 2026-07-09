@@ -72,8 +72,9 @@
   .stage{
     position:relative;z-index:2;
     flex:1;min-height:0;
-    display:flex;align-items:center;justify-content:center;
+    display:flex;align-items:safe center;justify-content:center;
     padding:clamp(14px,3vh,32px) clamp(16px,4vw,32px);
+    overflow-y:auto;
   }
 
   /* ============ EL MEMO ============ */
@@ -88,7 +89,6 @@
     column-gap:0;
     transition:grid-template-columns .4s ease,grid-template-rows .4s ease,
       max-width .4s ease,column-gap .4s ease;
-    overflow:hidden;
   }
   .memo:has(.req-check:checked,.dep-check:checked){grid-template-rows:auto 1fr;}
   .memo-main{grid-column:1;grid-row:1;min-width:0;}
@@ -266,10 +266,25 @@
     text-transform:uppercase;color:var(--active);white-space:nowrap;
   }
   .proj[open] summary{border-bottom:1px solid var(--paper-line);}
-  .proj-body{
-    padding:10px 11px 12px;
-    font-size:.76rem;line-height:1.5;color:var(--body-c);
+  .proj-body{padding:11px 12px 13px;}
+  .report-grid{
+    display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:3px;
+    padding-bottom:10px;margin-bottom:10px;
+    border-bottom:1px dashed var(--paper-line);
   }
+  .rf-label{
+    font-family:var(--mono);font-size:7px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--gray);white-space:nowrap;
+  }
+  .rf-value{font-size:.74rem;color:var(--ink);}
+  .report-section{margin-top:9px;}
+  .report-section:first-of-type{margin-top:0;}
+  .rs-label{
+    display:block;
+    font-family:var(--mono);font-size:7px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--stamp);margin-bottom:3px;
+  }
+  .report-section p{font-size:.74rem;line-height:1.5;color:var(--body-c);}
 
   .memo-foot{
     margin-top:16px;
@@ -396,10 +411,29 @@
                 <span class="proj-status">Completado</span>
               </summary>
               <div class="proj-body">
-                Sistema de alerta por SMS para riesgo de inundación en zonas rurales sin
-                cobertura de datos. Desplegado en 6 días para una red de 12 comunidades.
-                Motivo: los sistemas comerciales existentes exigían meses de instalación
-                y contratos fuera del presupuesto de la comunidad.
+                <div class="report-grid">
+                  <span class="rf-label">Operación</span><span class="rf-value">Alerta Temprana</span>
+                  <span class="rf-label">AO</span><span class="rf-value">Región Norte — 12 comunidades rurales</span>
+                  <span class="rf-label">Unidad</span><span class="rf-value">Equipo de despliegue UDSG-04</span>
+                  <span class="rf-label">Duración</span><span class="rf-value">6 días</span>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Situación</span>
+                  <p>Las comunidades de la cuenca no contaban con mecanismo de alerta ante
+                  riesgo de inundación. Los sistemas comerciales disponibles exigían meses
+                  de instalación y contratos fuera del presupuesto de la zona.</p>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Acción</span>
+                  <p>Se diseñó, integró y desplegó una red de alerta por SMS sobre
+                  infraestructura celular básica existente, con nodos de monitoreo de
+                  nivel de agua y notificación en cascada a líderes comunitarios.</p>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Resultado</span>
+                  <p>Sistema operativo en 6 días. Cobertura de 12 comunidades, sin costo
+                  recurrente para los beneficiarios.</p>
+                </div>
               </div>
             </details>
             <details class="proj">
@@ -409,10 +443,29 @@
                 <span class="proj-status">Completado</span>
               </summary>
               <div class="proj-body">
-                Plataforma de gestión escolar que funciona sin conexión constante a
-                internet, para una red de escuelas rurales; sincroniza datos cuando hay
-                señal disponible. Motivo: el software comercial requería suscripciones
-                mensuales insostenibles para la fundación.
+                <div class="report-grid">
+                  <span class="rf-label">Operación</span><span class="rf-value">Nodo Educativo</span>
+                  <span class="rf-label">AO</span><span class="rf-value">Red de 8 escuelas rurales</span>
+                  <span class="rf-label">Unidad</span><span class="rf-value">Equipo de desarrollo UDSG-03</span>
+                  <span class="rf-label">Duración</span><span class="rf-value">3 semanas</span>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Situación</span>
+                  <p>El software de gestión escolar comercial requería suscripciones
+                  mensuales insostenibles para el presupuesto de la fundación y dependía
+                  de conexión constante a internet, poco confiable en la zona.</p>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Acción</span>
+                  <p>Se desarrolló e implementó una plataforma offline-first con
+                  sincronización diferida: registro de asistencia, calificaciones y
+                  comunicación administrativa sin depender de señal constante.</p>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Resultado</span>
+                  <p>Adoptada por los 8 planteles. Costos de licenciamiento eliminados;
+                  sincronización exitosa en ventanas de conectividad limitada.</p>
+                </div>
               </div>
             </details>
             <details class="proj">
@@ -422,10 +475,29 @@
                 <span class="proj-status">Completado</span>
               </summary>
               <div class="proj-body">
-                Red de radio-relevo tipo malla más aplicación de rastreo para un equipo
-                voluntario de búsqueda y rescate en zonas sin señal celular. Motivo:
-                coordinar operaciones sin depender de infraestructura comercial de
-                telecomunicaciones.
+                <div class="report-grid">
+                  <span class="rf-label">Operación</span><span class="rf-value">Enlace SAR</span>
+                  <span class="rf-label">AO</span><span class="rf-value">Zona montañosa sin cobertura celular</span>
+                  <span class="rf-label">Unidad</span><span class="rf-value">Equipo táctico UDSG-02</span>
+                  <span class="rf-label">Duración</span><span class="rf-value">4 días</span>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Situación</span>
+                  <p>El equipo voluntario de búsqueda y rescate operaba sin sistema de
+                  comunicación confiable en terreno sin señal, dependiendo de radios de
+                  corto alcance sin coordinación centralizada.</p>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Acción</span>
+                  <p>Se desplegó una red de radio-relevo tipo malla, más una aplicación de
+                  rastreo de posición en tiempo real para coordinar equipos en campo con
+                  el comando central.</p>
+                </div>
+                <div class="report-section">
+                  <span class="rs-label">Resultado</span>
+                  <p>Cobertura de comunicación en el 100% del área de operaciones. Tiempo
+                  de coordinación entre equipos reducido de forma significativa.</p>
+                </div>
               </div>
             </details>
           </div>
