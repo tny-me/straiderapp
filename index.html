@@ -81,6 +81,32 @@
     border:1px solid var(--paper-line);
     box-shadow:0 24px 50px rgba(17,18,20,.16);
     padding:clamp(18px,3vh,30px) clamp(22px,4vw,44px);
+    display:grid;grid-template-columns:1fr;grid-template-rows:auto 0fr;
+    transition:grid-template-rows .4s ease,grid-template-columns .4s ease,
+      max-width .4s ease,column-gap .4s ease;
+    overflow:hidden;
+  }
+  .memo:has(.req-check:checked){grid-template-rows:auto 1fr;}
+  .memo-main{grid-column:1;grid-row:1;min-width:0;}
+  .request-pane{grid-column:1;grid-row:2;min-height:0;overflow:hidden;}
+  .request-pane-in{
+    padding-top:16px;
+    opacity:0;transform:translateY(-6px);
+    transition:opacity .3s ease .05s,transform .3s ease .05s;
+  }
+  .memo:has(.req-check:checked) .request-pane-in{opacity:1;transform:translateY(0);}
+  @media (min-width:760px){
+    .memo:has(.req-check:checked){
+      grid-template-columns:1fr 1fr;grid-template-rows:auto;
+      column-gap:36px;max-width:960px;
+    }
+    .memo:has(.req-check:checked) .request-pane{grid-column:2;grid-row:1;}
+    .memo:has(.req-check:checked) .request-pane-in{
+      padding-top:0;padding-left:30px;height:100%;
+      border-left:1px dashed var(--paper-line);
+      transform:translateX(0);
+    }
+    .request-pane-in{transform:translateX(10px);}
   }
   .letterhead{
     display:flex;align-items:baseline;gap:12px;
@@ -169,31 +195,25 @@
   .stamp-btn .box{font-size:12px;line-height:1;}
 
   /* ============ FORMULARIO DE SOLICITUD ============ */
-  details.request{display:block;flex:1 1 280px;max-width:380px;}
-  details.request summary{list-style:none;}
-  details.request summary::-webkit-details-marker{display:none;}
-  details.request summary.stamp-btn{cursor:pointer;}
-  details[open].request summary.stamp-btn{
+  .req-check{position:absolute;opacity:0;pointer-events:none;}
+  .req-label{cursor:pointer;}
+  .memo:has(.req-check:checked) .req-label.primary{
     animation:glowpulse .6s ease;
   }
   @keyframes glowpulse{
     0%{box-shadow:0 0 0 0 rgba(17,18,20,.4);}
     100%{box-shadow:0 0 0 12px rgba(17,18,20,0);}
   }
-  .request-wrap{
-    display:grid;grid-template-rows:0fr;
-    transition:grid-template-rows .4s ease;
+  .rp-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;
   }
-  details[open] .request-wrap{grid-template-rows:1fr;}
-  .request-inner{
-    overflow:hidden;
-    opacity:0;transform:translateY(-6px);
-    transition:opacity .3s ease .05s,transform .3s ease .05s;
+  .rp-close{
+    cursor:pointer;font-size:14px;color:var(--gray);
+    line-height:1;padding:2px 4px;
   }
-  details[open] .request-inner{opacity:1;transform:translateY(0);}
+  .rp-close:hover{color:var(--ink);}
   .request-form{
-    padding-top:16px;margin-top:2px;
-    border-top:1px dashed var(--paper-line);
     display:flex;flex-direction:column;gap:12px;
   }
   .request-form label{
@@ -240,14 +260,12 @@
     .m2{margin-top:6px;}
     .memo-actions{margin-top:12px;gap:8px;}
     .stamp-btn{padding:9px 14px;font-size:9.5px;}
-    details.request{flex-basis:100%;max-width:none;}
-    .request-form{padding-top:12px;gap:10px;}
+    .request-form{gap:10px;}
     .memo-foot{margin-top:10px;}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important;}
     html{scroll-behavior:auto;}
-    details[open].request summary.stamp-btn{animation:none;}
   }
 </style>
 </head>
@@ -259,67 +277,74 @@
 
 <main class="stage">
   <div class="memo">
-    <div class="letterhead">
-      <b>UDSG®</b>
-      <span>United Deployment Systems Group</span>
-    </div>
+    <input type="checkbox" id="req-check" class="req-check">
 
-    <div class="memo-header">
-      <div class="mh-row"><span class="mh-label">Para</span><span class="mh-value">Operadores de campo</span></div>
-      <div class="mh-row"><span class="mh-label">De</span><span class="mh-value">UDSG // Comando</span></div>
-      <div class="mh-row"><span class="mh-label">Ref</span><span class="mh-value mono">UDSG-00 / Declaración</span></div>
-      <div class="mh-row"><span class="mh-label">Fecha</span><span class="mh-value mono" id="zulu">--:--:--Z</span></div>
-      <div class="mh-row"><span class="mh-label">Estado</span><span class="mh-value"><span class="status"><span class="status-dot"></span>Activo</span></span></div>
-      <div class="mh-row"><span class="mh-label">Modo</span><span class="mh-value">Bajo demanda</span></div>
-    </div>
+    <div class="memo-main">
+      <div class="letterhead">
+        <b>UDSG®</b>
+        <span>United Deployment Systems Group</span>
+      </div>
 
-    <h1>Organización de ingeniería y desarrollo tecnológico.</h1>
+      <div class="memo-header">
+        <div class="mh-row"><span class="mh-label">Para</span><span class="mh-value">Operadores de campo</span></div>
+        <div class="mh-row"><span class="mh-label">De</span><span class="mh-value">UDSG // Comando</span></div>
+        <div class="mh-row"><span class="mh-label">Ref</span><span class="mh-value mono">UDSG-00 / Declaración</span></div>
+        <div class="mh-row"><span class="mh-label">Fecha</span><span class="mh-value mono" id="zulu">--:--:--Z</span></div>
+        <div class="mh-row"><span class="mh-label">Estado</span><span class="mh-value"><span class="status"><span class="status-dot"></span>Activo</span></span></div>
+        <div class="mh-row"><span class="mh-label">Modo</span><span class="mh-value">Bajo demanda</span></div>
+      </div>
 
-    <p class="manifest">
-      UDSG® es una organización civil privada de ingeniería táctica y desarrollo
-      tecnológico. Desarrolla, integra y opera plataformas, software e infraestructura
-      digital para organizaciones y situaciones que requieren capacidad operativa,
-      ejecución rápida y despliegues eficientes.
-    </p>
-    <p class="manifest m2">
-      Su misión es hacer posible la transformación tecnológica donde la complejidad,
-      los costos desproporcionados o los procesos convencionales impiden que las
-      soluciones lleguen a quienes las necesitan. Independiente del Estado.
-    </p>
+      <h1>Organización de ingeniería y desarrollo tecnológico.</h1>
 
-    <div class="memo-actions">
-      <details class="request">
-        <summary class="stamp-btn primary">
+      <p class="manifest">
+        UDSG® es una organización civil privada de ingeniería táctica y desarrollo
+        tecnológico. Desarrolla, integra y opera plataformas, software e infraestructura
+        digital para organizaciones y situaciones que requieren capacidad operativa,
+        ejecución rápida y despliegues eficientes.
+      </p>
+      <p class="manifest m2">
+        Su misión es hacer posible la transformación tecnológica donde la complejidad,
+        los costos desproporcionados o los procesos convencionales impiden que las
+        soluciones lleguen a quienes las necesitan. Independiente del Estado.
+      </p>
+
+      <div class="memo-actions">
+        <label for="req-check" class="stamp-btn primary req-label">
           <span class="box">☑</span> Solicitar despliegue
-        </summary>
-        <div class="request-wrap">
-          <div class="request-inner">
-            <form class="request-form" action="mailto:acceso@udsg.dev" method="post" enctype="text/plain">
-              <label>Nombre
-                <input type="text" name="Nombre" required>
-              </label>
-              <label>Organización
-                <input type="text" name="Organización">
-              </label>
-              <label>Correo de contacto
-                <input type="email" name="Correo" required>
-              </label>
-              <label>Propósito del despliegue
-                <textarea name="Propósito" rows="3" required></textarea>
-              </label>
-              <button type="submit" class="stamp-btn primary request-submit">
-                <span class="box">☑</span> Enviar solicitud
-              </button>
-            </form>
-          </div>
-        </div>
-      </details>
-      <a class="stamp-btn" href="#">
-        <span class="box">☐</span> Despliegues
-      </a>
+        </label>
+        <a class="stamp-btn" href="#">
+          <span class="box">☐</span> Despliegues
+        </a>
+      </div>
+
+      <div class="memo-foot">Las solicitudes se evalúan · No todas son aceptadas<span class="cursor">_</span></div>
     </div>
 
-    <div class="memo-foot">Las solicitudes se evalúan · No todas son aceptadas<span class="cursor">_</span></div>
+    <div class="request-pane">
+      <div class="request-pane-in">
+        <div class="rp-head">
+          <span class="mono">UDSG-00 / Formulario de solicitud</span>
+          <label for="req-check" class="rp-close" aria-label="Cerrar">✕</label>
+        </div>
+        <form class="request-form" action="mailto:acceso@udsg.dev" method="post" enctype="text/plain">
+          <label>Nombre
+            <input type="text" name="Nombre" required>
+          </label>
+          <label>Organización
+            <input type="text" name="Organización">
+          </label>
+          <label>Correo de contacto
+            <input type="email" name="Correo" required>
+          </label>
+          <label>Propósito del despliegue
+            <textarea name="Propósito" rows="3" required></textarea>
+          </label>
+          <button type="submit" class="stamp-btn primary request-submit">
+            <span class="box">☑</span> Enviar solicitud
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 </main>
 
