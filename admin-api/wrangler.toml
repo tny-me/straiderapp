@@ -1,0 +1,13 @@
+name = "udsg-admin-api"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "udsg-admin"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# Dominio del panel que puede llamar a esta API (para CORS).
+# Cambia esto si sirves el panel desde otra URL.
+[vars]
+ALLOWED_ORIGIN = "https://udsg.dev"

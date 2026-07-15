@@ -1,0 +1,13 @@
+{
+  "name": "udsg-admin-api",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --local --persist-to=.wrangler/state",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 execute udsg-admin --local --file=./schema.sql",
+    "db:migrate:remote": "wrangler d1 execute udsg-admin --remote --file=./schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

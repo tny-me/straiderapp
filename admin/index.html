@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UDSG — Panel de proyectos</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#0E0F10;
+  --paper:#F7F6F2;
+  --paper-dim:#EFEDE7;
+  --ink:#141414;
+  --ink-lo:#6E6A62;
+  --rule:#D8D4CB;
+  --red:#B3261E;
+  --green:#2E6B45;
+  --amber:#9A7B1F;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Schibsted Grotesk',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--desk);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+::selection{background:var(--ink);color:var(--paper)}
+
+/* ---------- barra superior ---------- */
+.topbar{background:var(--desk);color:#C9C9C4;display:flex;align-items:center;gap:16px;padding:14px 24px;flex:none;border-bottom:1px solid #232323}
+.topbar .brand{font-weight:700;font-size:16px;color:#F7F6F2}
+.topbar .brand sup{font-size:8px;font-weight:400}
+.topbar .sub{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#6e6e6a}
+.topbar .spacer{flex:1}
+.topbar .logout{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8A8A86;background:none;border:1px solid #333;padding:8px 14px}
+.topbar .logout:hover{color:#F7F6F2;border-color:#555}
+
+/* ---------- escenario del tablero ---------- */
+.board-wrap{flex:1;min-height:0;overflow:auto;padding:22px 24px}
+.board-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.board-head h1{font-size:19px;font-weight:600;letter-spacing:-.01em;color:#F7F6F2}
+.board-head .count{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#6e6e6a}
+.new-btn{margin-left:auto;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:var(--red);color:#fff;border:none;padding:11px 18px}
+.new-btn:hover{background:#96201A}
+
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,1fr);gap:14px;align-items:start}
+.col{background:var(--paper);border:1px solid #232323;display:flex;flex-direction:column;max-height:calc(100vh - 170px)}
+.col-head{padding:12px 14px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px;flex:none}
+.col-head .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.col-head .t{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+.col-head .n{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--ink-lo)}
+.col-body{padding:10px;display:flex;flex-direction:column;gap:9px;overflow-y:auto}
+
+.card{background:#fff;border:1px solid var(--rule);padding:11px 12px;cursor:pointer;transition:border-color .12s}
+.card:hover{border-color:var(--ink)}
+.card .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.card .name{font-size:13px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+.card .ref{font-family:var(--mono);font-size:8px;color:var(--ink-lo);white-space:nowrap;margin-top:2px}
+.card .client{font-size:11px;color:var(--ink-lo);margin-bottom:8px}
+.card .meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tag{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:1px solid currentColor}
+.tag.Alta{color:var(--red)}
+.tag.Normal{color:var(--ink-lo)}
+.tag.Baja{color:var(--green)}
+.bar{flex:1;height:4px;background:var(--paper-dim);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--ink);display:block}
+.pct{font-family:var(--mono);font-size:9px;color:var(--ink-lo);white-space:nowrap}
+
+.empty-col{padding:20px 12px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-lo)}
+
+/* ---------- overlay de acceso ---------- */
+.gate{position:fixed;inset:0;background:var(--desk);display:flex;align-items:center;justify-content:center;z-index:50}
+.gate-card{width:min(360px,90%);background:var(--paper);border:1px solid #232323;padding:28px 26px}
+.gate-card .brand{font-weight:700;font-size:20px;margin-bottom:2px}
+.gate-card .brand sup{font-size:9px;font-weight:400}
+.gate-card .sub{font-family:var(--mono);font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-lo);margin-bottom:22px}
+.gate-card label{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-lo);margin-bottom:6px}
+.gate-card input{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--ink);font-family:var(--mono);font-size:13px;padding:8px 2px;margin-bottom:16px}
+.gate-card input:focus{outline:none;border-bottom-color:var(--red)}
+.gate-card button{width:100%;background:var(--ink);color:var(--paper);border:none;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:13px}
+.gate-card button:hover{background:#000}
+.gate-err{font-family:var(--mono);font-size:9.5px;color:var(--red);margin-top:12px;min-height:14px}
+.hidden{display:none!important}
+
+/* ---------- modal de proyecto ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:40;padding:20px}
+.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:var(--paper);border:1px solid #232323;padding:26px}
+.modal h2{font-size:17px;font-weight:600;margin-bottom:18px;letter-spacing:-.01em}
+.field{margin-bottom:14px}
+.field label{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-lo);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--ink);font-family:var(--mono);font-size:12px;color:var(--ink);padding:6px 2px;border-radius:0}
+.field textarea{resize:vertical;font-family:var(--sans);font-size:13px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-bottom-color:var(--red)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.mbtn{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:11px 18px;border:1.5px solid var(--ink);background:transparent;color:var(--ink)}
+.mbtn.solid{background:var(--ink);color:var(--paper)}
+.mbtn.danger{border-color:var(--red);color:var(--red)}
+.mbtn.danger:hover{background:var(--red);color:#fff}
+.mbtn.solid:hover{background:#000}
+.mbtn:not(.solid):not(.danger):hover{background:var(--paper-dim)}
+.modal-msg{font-family:var(--mono);font-size:9.5px;margin-top:10px;min-height:14px}
+
+@media(max-width:760px){
+  .board{grid-auto-flow:row;grid-auto-columns:unset}
+  .col{max-height:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="brand">UDSG<sup>®</sup></div>
+    <div class="sub">Panel de proyectos — acceso restringido</div>
+    <label for="pass">Contraseña</label>
+    <input type="password" id="pass" autocomplete="current-password">
+    <button id="loginBtn">Ingresar</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<!-- TABLERO -->
+<div class="topbar">
+  <span class="brand">UDSG<sup>®</sup></span>
+  <span class="sub">Panel de proyectos</span>
+  <div class="spacer"></div>
+  <button class="logout" id="logoutBtn">Cerrar sesión</button>
+</div>
+
+<div class="board-wrap">
+  <div class="board-head">
+    <h1>Control de proyectos</h1>
+    <span class="count" id="totalCount">— proyectos</span>
+    <button class="new-btn" id="newBtn">+ Nuevo proyecto</button>
+  </div>
+  <div class="board" id="board"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg hidden" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Nuevo proyecto</h2>
+    <input type="hidden" id="pId">
+    <div class="field"><label>Nombre del proyecto</label><input type="text" id="pName"></div>
+    <div class="field"><label>Cliente / Organización</label><input type="text" id="pClient"></div>
+    <div class="f2">
+      <div class="field"><label>Estado</label>
+        <select id="pStatus">
+          <option>Solicitud</option>
+          <option>Evaluación</option>
+          <option>Desarrollo</option>
+          <option>Entrega</option>
+          <option>Completado</option>
+        </select>
+      </div>
+      <div class="field"><label>Prioridad</label>
+        <select id="pPriority">
+          <option>Baja</option>
+          <option selected>Normal</option>
+          <option>Alta</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Avance (%)</label><input type="number" id="pProgress" min="0" max="100" value="0"></div>
+    <div class="field"><label>Descripción</label><textarea id="pDesc" rows="3"></textarea></div>
+    <div class="modal-actions">
+      <button class="mbtn solid" id="saveBtn">Guardar</button>
+      <button class="mbtn danger hidden" id="deleteBtn">Eliminar</button>
+      <button class="mbtn" id="cancelBtn">Cancelar</button>
+    </div>
+    <div class="modal-msg" id="modalMsg"></div>
+  </div>
+</div>
+
+<script>
+// -------- configuración --------
+// Cambia esto por la URL de tu Worker desplegado (o tu dominio personalizado, ej. https://api.udsg.dev)
+const API_BASE = 'https://udsg-admin-api.YOUR-SUBDOMAIN.workers.dev';
+
+const STATUSES = ['Solicitud','Evaluación','Desarrollo','Entrega','Completado'];
+const STATUS_COLOR = {Solicitud:'#9A7B1F',Evaluación:'#B3261E',Desarrollo:'#1E5FB3',Entrega:'#6E4EA8',Completado:'#2E6B45'};
+
+const gate=document.getElementById('gate');
+const gateErr=document.getElementById('gateErr');
+const board=document.getElementById('board');
+const totalCount=document.getElementById('totalCount');
+const modalBg=document.getElementById('modalBg');
+const modalMsg=document.getElementById('modalMsg');
+
+async function api(path, opts) {
+  const res = await fetch(API_BASE + path, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  let data = {};
+  try { data = await res.json(); } catch {}
+  if (!res.ok) throw new Error(data.error || 'Error de conexión.');
+  return data;
+}
+
+async function checkSession() {
+  try {
+    const { ok } = await api('/api/me');
+    if (ok) { gate.classList.add('hidden'); loadProjects(); }
+    else gate.classList.remove('hidden');
+  } catch {
+    gate.classList.remove('hidden');
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  gateErr.textContent = '';
+  const pass = document.getElementById('pass').value;
+  try {
+    await api('/api/login', { method: 'POST', body: JSON.stringify({ password: pass }) });
+    gate.classList.add('hidden');
+    loadProjects();
+  } catch (e) {
+    gateErr.textContent = '> ' + e.message;
+  }
+});
+document.getElementById('pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await api('/api/logout', { method: 'POST' });
+  location.reload();
+});
+
+let projects = [];
+
+async function loadProjects() {
+  const { projects: list } = await api('/api/projects');
+  projects = list;
+  render();
+}
+
+function render() {
+  totalCount.textContent = projects.length + (projects.length === 1 ? ' proyecto' : ' proyectos');
+  board.innerHTML = '';
+  STATUSES.forEach(status => {
+    const items = projects.filter(p => p.status === status);
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML = `
+      <div class="col-head">
+        <span class="dot" style="background:${STATUS_COLOR[status]}"></span>
+        <span class="t">${status}</span>
+        <span class="n">${items.length}</span>
+      </div>
+      <div class="col-body"></div>
+    `;
+    const body = col.querySelector('.col-body');
+    if (items.length === 0) {
+      body.innerHTML = '<div class="empty-col">Sin proyectos</div>';
+    } else {
+      items.forEach(p => body.appendChild(renderCard(p)));
+    }
+    board.appendChild(col);
+  });
+}
+
+function renderCard(p) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="top">
+      <span class="name">${escapeHtml(p.name)}</span>
+      <span class="ref">${escapeHtml(p.ref)}</span>
+    </div>
+    <div class="client">${escapeHtml(p.client || '—')}</div>
+    <div class="meta">
+      <span class="tag ${p.priority}">${p.priority}</span>
+      <span class="bar"><i style="width:${p.progress}%"></i></span>
+      <span class="pct">${p.progress}%</span>
+    </div>
+  `;
+  card.addEventListener('click', () => openModal(p));
+  return card;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function openModal(project) {
+  modalMsg.textContent = '';
+  document.getElementById('modalTitle').textContent = project ? 'Editar proyecto' : 'Nuevo proyecto';
+  document.getElementById('pId').value = project ? project.id : '';
+  document.getElementById('pName').value = project ? project.name : '';
+  document.getElementById('pClient').value = project ? project.client || '' : '';
+  document.getElementById('pStatus').value = project ? project.status : 'Solicitud';
+  document.getElementById('pPriority').value = project ? project.priority : 'Normal';
+  document.getElementById('pProgress').value = project ? project.progress : 0;
+  document.getElementById('pDesc').value = project ? project.description || '' : '';
+  document.getElementById('deleteBtn').classList.toggle('hidden', !project);
+  modalBg.classList.remove('hidden');
+}
+function closeModal() { modalBg.classList.add('hidden'); }
+
+document.getElementById('newBtn').addEventListener('click', () => openModal(null));
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+modalBg.addEventListener('click', e => { if (e.target === modalBg) closeModal(); });
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const id = document.getElementById('pId').value;
+  const payload = {
+    name: document.getElementById('pName').value.trim(),
+    client: document.getElementById('pClient').value.trim(),
+    status: document.getElementById('pStatus').value,
+    priority: document.getElementById('pPriority').value,
+    progress: Number(document.getElementById('pProgress').value),
+    description: document.getElementById('pDesc').value.trim(),
+  };
+  if (!payload.name) { modalMsg.style.color = 'var(--red)'; modalMsg.textContent = '> El nombre es obligatorio.'; return; }
+  try {
+    if (id) await api('/api/projects/' + id, { method: 'PATCH', body: JSON.stringify(payload) });
+    else await api('/api/projects', { method: 'POST', body: JSON.stringify(payload) });
+    closeModal();
+    loadProjects();
+  } catch (e) {
+    modalMsg.style.color = 'var(--red)';
+    modalMsg.textContent = '> ' + e.message;
+  }
+});
+
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+  const id = document.getElementById('pId').value;
+  if (!id || !confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
+  try {
+    await api('/api/projects/' + id, { method: 'DELETE' });
+    closeModal();
+    loadProjects();
+  } catch (e) {
+    modalMsg.style.color = 'var(--red)';
+    modalMsg.textContent = '> ' + e.message;
+  }
+});
+
+checkSession();
+</script>
+</body>
+</html>

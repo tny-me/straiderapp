@@ -1,0 +1,215 @@
+// UDSG Admin Panel — API (Cloudflare Worker + D1)
+// Rutas:
+//   POST   /api/login          { password }              -> set-cookie de sesión
+//   POST   /api/logout                                    -> borra la sesión
+//   GET    /api/me                                         -> valida la sesión actual
+//   GET    /api/projects                                   -> lista de proyectos
+//   POST   /api/projects       { name, client, ... }       -> crea proyecto
+//   PATCH  /api/projects/:id   { campos a actualizar }      -> actualiza proyecto
+//   DELETE /api/projects/:id                                -> elimina proyecto
+
+const SESSION_TTL_SECONDS = 60 * 60 * 12; // 12 horas
+const COOKIE_NAME = "udsg_session";
+const VALID_STATUS = ["Solicitud", "Evaluación", "Desarrollo", "Entrega", "Completado"];
+const VALID_PRIORITY = ["Baja", "Normal", "Alta"];
+
+function corsHeaders(origin, allowedOrigin) {
+  const headers = {
+    "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Credentials": "true",
+    Vary: "Origin",
+  };
+  if (origin === allowedOrigin) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
+
+function json(data, status, extraHeaders) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json", ...(extraHeaders || {}) },
+  });
+}
+
+function bufToBase64Url(buf) {
+  let str = "";
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlToBuf(b64url) {
+  const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = b64.length % 4 === 0 ? "" : "=".repeat(4 - (b64.length % 4));
+  const str = atob(b64 + pad);
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function hmacKey(secret) {
+  return crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+}
+
+async function signSession(secret) {
+  const payload = JSON.stringify({ exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS });
+  const payloadB64 = bufToBase64Url(new TextEncoder().encode(payload));
+  const key = await hmacKey(secret);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payloadB64));
+  return `${payloadB64}.${bufToBase64Url(sig)}`;
+}
+
+async function verifySession(token, secret) {
+  if (!token || !token.includes(".")) return false;
+  const [payloadB64, sigB64] = token.split(".");
+  const key = await hmacKey(secret);
+  const valid = await crypto.subtle.verify(
+    "HMAC",
+    key,
+    base64UrlToBuf(sigB64),
+    new TextEncoder().encode(payloadB64)
+  );
+  if (!valid) return false;
+  try {
+    const payload = JSON.parse(new TextDecoder().decode(base64UrlToBuf(payloadB64)));
+    return payload.exp > Math.floor(Date.now() / 1000);
+  } catch {
+    return false;
+  }
+}
+
+function getCookie(request, name) {
+  const header = request.headers.get("Cookie") || "";
+  const match = header.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function constantTimeEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = new TextEncoder().encode(a);
+  const bufB = new TextEncoder().encode(b);
+  if (bufA.length !== bufB.length) return false;
+  let diff = 0;
+  for (let i = 0; i < bufA.length; i++) diff |= bufA[i] ^ bufB[i];
+  return diff === 0;
+}
+
+async function requireAuth(request, env) {
+  const token = getCookie(request, COOKIE_NAME);
+  return verifySession(token, env.SESSION_SECRET);
+}
+
+function sessionCookie(value, maxAge) {
+  return `${COOKIE_NAME}=${encodeURIComponent(value)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${maxAge}`;
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const origin = request.headers.get("Origin") || "";
+    const cors = corsHeaders(origin, env.ALLOWED_ORIGIN);
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: cors });
+    }
+
+    try {
+      // ---- auth ----
+      if (url.pathname === "/api/login" && request.method === "POST") {
+        const body = await request.json().catch(() => ({}));
+        if (!constantTimeEqual(body.password || "", env.ADMIN_PASSWORD)) {
+          return json({ ok: false, error: "Contraseña incorrecta." }, 401, cors);
+        }
+        const token = await signSession(env.SESSION_SECRET);
+        return json({ ok: true }, 200, {
+          ...cors,
+          "Set-Cookie": sessionCookie(token, SESSION_TTL_SECONDS),
+        });
+      }
+
+      if (url.pathname === "/api/logout" && request.method === "POST") {
+        return json({ ok: true }, 200, { ...cors, "Set-Cookie": sessionCookie("", 0) });
+      }
+
+      if (url.pathname === "/api/me" && request.method === "GET") {
+        const authed = await requireAuth(request, env);
+        return json({ ok: authed }, authed ? 200 : 401, cors);
+      }
+
+      // ---- todo lo demás requiere sesión válida ----
+      if (!(await requireAuth(request, env))) {
+        return json({ ok: false, error: "No autorizado." }, 401, cors);
+      }
+
+      // ---- proyectos ----
+      if (url.pathname === "/api/projects" && request.method === "GET") {
+        const { results } = await env.DB.prepare(
+          "SELECT * FROM projects ORDER BY updated_at DESC"
+        ).all();
+        return json({ ok: true, projects: results }, 200, cors);
+      }
+
+      if (url.pathname === "/api/projects" && request.method === "POST") {
+        const body = await request.json().catch(() => ({}));
+        if (!body.name || !body.name.trim()) {
+          return json({ ok: false, error: "El nombre del proyecto es obligatorio." }, 400, cors);
+        }
+        const status = VALID_STATUS.includes(body.status) ? body.status : "Solicitud";
+        const priority = VALID_PRIORITY.includes(body.priority) ? body.priority : "Normal";
+        const progress = Math.max(0, Math.min(100, Number(body.progress) || 0));
+        const ref = "UDSG-" + Date.now().toString(36).toUpperCase();
+        const now = new Date().toISOString();
+        await env.DB.prepare(
+          `INSERT INTO projects (ref, name, client, status, priority, progress, description, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(ref, body.name.trim(), body.client || "", status, priority, progress, body.description || "", now, now)
+          .run();
+        return json({ ok: true, ref }, 201, cors);
+      }
+
+      const projectMatch = url.pathname.match(/^\/api\/projects\/(\d+)$/);
+      if (projectMatch && request.method === "PATCH") {
+        const id = Number(projectMatch[1]);
+        const body = await request.json().catch(() => ({}));
+        const fields = [];
+        const values = [];
+        if (typeof body.name === "string") { fields.push("name = ?"); values.push(body.name.trim()); }
+        if (typeof body.client === "string") { fields.push("client = ?"); values.push(body.client); }
+        if (VALID_STATUS.includes(body.status)) { fields.push("status = ?"); values.push(body.status); }
+        if (VALID_PRIORITY.includes(body.priority)) { fields.push("priority = ?"); values.push(body.priority); }
+        if (body.progress !== undefined) {
+          fields.push("progress = ?");
+          values.push(Math.max(0, Math.min(100, Number(body.progress) || 0)));
+        }
+        if (typeof body.description === "string") { fields.push("description = ?"); values.push(body.description); }
+        if (fields.length === 0) {
+          return json({ ok: false, error: "Nada para actualizar." }, 400, cors);
+        }
+        fields.push("updated_at = ?");
+        values.push(new Date().toISOString());
+        values.push(id);
+        await env.DB.prepare(`UPDATE projects SET ${fields.join(", ")} WHERE id = ?`)
+          .bind(...values)
+          .run();
+        return json({ ok: true }, 200, cors);
+      }
+
+      if (projectMatch && request.method === "DELETE") {
+        const id = Number(projectMatch[1]);
+        await env.DB.prepare("DELETE FROM projects WHERE id = ?").bind(id).run();
+        return json({ ok: true }, 200, cors);
+      }
+
+      return json({ ok: false, error: "No encontrado." }, 404, cors);
+    } catch (err) {
+      return json({ ok: false, error: "Error del servidor." }, 500, cors);
+    }
+  },
+};
