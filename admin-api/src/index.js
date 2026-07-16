@@ -149,10 +149,16 @@ export default {
 
       // ---- proyectos ----
       if (url.pathname === "/api/projects" && request.method === "GET") {
-        const { results } = await env.DB.prepare(
-          "SELECT * FROM projects ORDER BY updated_at DESC"
-        ).all();
-        return json({ ok: true, projects: results }, 200, cors);
+        const [{ results: projects }, { results: tasks }] = await Promise.all([
+          env.DB.prepare("SELECT * FROM projects ORDER BY updated_at DESC").all(),
+          env.DB.prepare("SELECT * FROM tasks ORDER BY position ASC, id ASC").all(),
+        ]);
+        const tasksByProject = {};
+        for (const t of tasks) {
+          (tasksByProject[t.project_id] ||= []).push({ ...t, done: !!t.done });
+        }
+        for (const p of projects) p.tasks = tasksByProject[p.id] || [];
+        return json({ ok: true, projects }, 200, cors);
       }
 
       if (url.pathname === "/api/projects" && request.method === "POST") {
@@ -165,11 +171,12 @@ export default {
         const progress = Math.max(0, Math.min(100, Number(body.progress) || 0));
         const ref = "UDSG-" + Date.now().toString(36).toUpperCase();
         const now = new Date().toISOString();
+        const dueDate = typeof body.due_date === "string" && body.due_date ? body.due_date : null;
         await env.DB.prepare(
-          `INSERT INTO projects (ref, name, client, status, priority, progress, description, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO projects (ref, name, client, status, priority, progress, description, due_date, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         )
-          .bind(ref, body.name.trim(), body.client || "", status, priority, progress, body.description || "", now, now)
+          .bind(ref, body.name.trim(), body.client || "", status, priority, progress, body.description || "", dueDate, now, now)
           .run();
         return json({ ok: true, ref }, 201, cors);
       }
@@ -189,6 +196,7 @@ export default {
           values.push(Math.max(0, Math.min(100, Number(body.progress) || 0)));
         }
         if (typeof body.description === "string") { fields.push("description = ?"); values.push(body.description); }
+        if (body.due_date !== undefined) { fields.push("due_date = ?"); values.push(body.due_date || null); }
         if (fields.length === 0) {
           return json({ ok: false, error: "Nada para actualizar." }, 400, cors);
         }
@@ -204,6 +212,52 @@ export default {
       if (projectMatch && request.method === "DELETE") {
         const id = Number(projectMatch[1]);
         await env.DB.prepare("DELETE FROM projects WHERE id = ?").bind(id).run();
+        return json({ ok: true }, 200, cors);
+      }
+
+      // ---- subtareas ----
+      const tasksListMatch = url.pathname.match(/^\/api\/projects\/(\d+)\/tasks$/);
+      if (tasksListMatch && request.method === "POST") {
+        const projectId = Number(tasksListMatch[1]);
+        const body = await request.json().catch(() => ({}));
+        if (!body.title || !body.title.trim()) {
+          return json({ ok: false, error: "El título de la subtarea es obligatorio." }, 400, cors);
+        }
+        const { results } = await env.DB.prepare(
+          "SELECT COALESCE(MAX(position), -1) + 1 AS nextPos FROM tasks WHERE project_id = ?"
+        )
+          .bind(projectId)
+          .all();
+        const position = results[0]?.nextPos ?? 0;
+        const res = await env.DB.prepare(
+          "INSERT INTO tasks (project_id, title, position) VALUES (?, ?, ?)"
+        )
+          .bind(projectId, body.title.trim(), position)
+          .run();
+        return json({ ok: true, id: res.meta.last_row_id }, 201, cors);
+      }
+
+      const taskMatch = url.pathname.match(/^\/api\/tasks\/(\d+)$/);
+      if (taskMatch && request.method === "PATCH") {
+        const id = Number(taskMatch[1]);
+        const body = await request.json().catch(() => ({}));
+        const fields = [];
+        const values = [];
+        if (typeof body.title === "string") { fields.push("title = ?"); values.push(body.title.trim()); }
+        if (body.done !== undefined) { fields.push("done = ?"); values.push(body.done ? 1 : 0); }
+        if (fields.length === 0) {
+          return json({ ok: false, error: "Nada para actualizar." }, 400, cors);
+        }
+        values.push(id);
+        await env.DB.prepare(`UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`)
+          .bind(...values)
+          .run();
+        return json({ ok: true }, 200, cors);
+      }
+
+      if (taskMatch && request.method === "DELETE") {
+        const id = Number(taskMatch[1]);
+        await env.DB.prepare("DELETE FROM tasks WHERE id = ?").bind(id).run();
         return json({ ok: true }, 200, cors);
       }
 

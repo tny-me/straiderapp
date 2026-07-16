@@ -44,24 +44,34 @@ button{font:inherit;cursor:pointer}
 .board-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
 .board-head h1{font-size:19px;font-weight:600;letter-spacing:-.01em;color:#F7F6F2}
 .board-head .count{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#6e6e6a}
+.view-toggle{display:flex;border:1px solid #333}
+.view-toggle button{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;background:none;border:none;color:#8A8A86;padding:8px 14px}
+.view-toggle button.on{background:#F7F6F2;color:var(--ink)}
 .new-btn{margin-left:auto;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:var(--red);color:#fff;border:none;padding:11px 18px}
 .new-btn:hover{background:#96201A}
 
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,1fr);gap:14px;align-items:start}
-.col{background:var(--paper);border:1px solid #232323;display:flex;flex-direction:column;max-height:calc(100vh - 170px)}
+.col{background:var(--paper);border:1px solid #232323;display:flex;flex-direction:column;max-height:calc(100vh - 170px);transition:background .12s}
+.col.drag-over{background:#E4E1D6}
 .col-head{padding:12px 14px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:8px;flex:none}
 .col-head .dot{width:7px;height:7px;border-radius:50%;flex:none}
 .col-head .t{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
 .col-head .n{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--ink-lo)}
-.col-body{padding:10px;display:flex;flex-direction:column;gap:9px;overflow-y:auto}
+.col-body{padding:10px;display:flex;flex-direction:column;gap:9px;overflow-y:auto;min-height:40px}
 
-.card{background:#fff;border:1px solid var(--rule);padding:11px 12px;cursor:pointer;transition:border-color .12s}
+.card{background:#fff;border:1px solid var(--rule);padding:11px 12px;cursor:pointer;transition:border-color .12s,opacity .12s}
 .card:hover{border-color:var(--ink)}
+.card.dragging{opacity:.35}
 .card .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
 .card .name{font-size:13px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
 .card .ref{font-family:var(--mono);font-size:8px;color:var(--ink-lo);white-space:nowrap;margin-top:2px}
 .card .client{font-size:11px;color:var(--ink-lo);margin-bottom:8px}
 .card .meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card .foot-row{display:flex;align-items:center;gap:10px;margin-top:8px;font-family:var(--mono);font-size:8.5px;color:var(--ink-lo)}
+.card .foot-row .due{padding:2px 6px;border:1px solid currentColor}
+.card .foot-row .due.overdue{color:var(--red)}
+.card .foot-row .due.soon{color:var(--amber)}
+.card .foot-row .tasks-count{margin-left:auto}
 .tag{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:1px solid currentColor}
 .tag.Alta{color:var(--red)}
 .tag.Normal{color:var(--ink-lo)}
@@ -71,6 +81,21 @@ button{font:inherit;cursor:pointer}
 .pct{font-family:var(--mono);font-size:9px;color:var(--ink-lo);white-space:nowrap}
 
 .empty-col{padding:20px 12px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-lo)}
+
+/* ---------- vista de tabla ---------- */
+.table-wrap{background:var(--paper);border:1px solid #232323;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{position:sticky;top:0;background:var(--paper-dim);text-align:left;padding:10px 12px;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-lo);cursor:pointer;white-space:nowrap;border-bottom:1px solid var(--rule)}
+thead th:hover{color:var(--ink)}
+thead th .arrow{margin-left:4px;opacity:.5}
+tbody tr{cursor:pointer;border-bottom:1px solid var(--rule)}
+tbody tr:hover{background:var(--paper-dim)}
+tbody td{padding:10px 12px;vertical-align:middle}
+tbody td.name-cell{font-weight:600}
+td .bar{width:80px;display:inline-block;vertical-align:middle}
+td .row-meta{display:flex;align-items:center;gap:8px}
+
+.empty-state{padding:40px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-lo)}
 
 /* ---------- overlay de acceso ---------- */
 .gate{position:fixed;inset:0;background:var(--desk);display:flex;align-items:center;justify-content:center;z-index:50}
@@ -88,7 +113,7 @@ button{font:inherit;cursor:pointer}
 
 /* ---------- modal de proyecto ---------- */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:40;padding:20px}
-.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:var(--paper);border:1px solid #232323;padding:26px}
+.modal{width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--paper);border:1px solid #232323;padding:26px}
 .modal h2{font-size:17px;font-weight:600;margin-bottom:18px;letter-spacing:-.01em}
 .field{margin-bottom:14px}
 .field label{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-lo);margin-bottom:5px}
@@ -96,6 +121,7 @@ button{font:inherit;cursor:pointer}
 .field textarea{resize:vertical;font-family:var(--sans);font-size:13px}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-bottom-color:var(--red)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .modal-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
 .mbtn{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:11px 18px;border:1.5px solid var(--ink);background:transparent;color:var(--ink)}
 .mbtn.solid{background:var(--ink);color:var(--paper)}
@@ -105,9 +131,29 @@ button{font:inherit;cursor:pointer}
 .mbtn:not(.solid):not(.danger):hover{background:var(--paper-dim)}
 .modal-msg{font-family:var(--mono);font-size:9.5px;margin-top:10px;min-height:14px}
 
+/* ---------- checklist de subtareas ---------- */
+.checklist-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.checklist-head label{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-lo)}
+.checklist-head .cl-pct{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--ink-lo)}
+.checklist{border:1px solid var(--rule);margin-bottom:10px}
+.check-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--rule)}
+.check-row:last-child{border-bottom:none}
+.check-row input[type=checkbox]{flex:none;width:15px;height:15px;accent-color:var(--red)}
+.check-row .ct{flex:1;font-size:12.5px}
+.check-row.done .ct{text-decoration:line-through;color:var(--ink-lo)}
+.check-row .del{flex:none;background:none;border:none;color:var(--ink-lo);font-size:14px;line-height:1;padding:2px 4px}
+.check-row .del:hover{color:var(--red)}
+.check-empty{padding:12px 10px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-lo);text-align:center}
+.check-add{display:flex;gap:8px;margin-bottom:16px}
+.check-add input{flex:1;background:transparent;border:none;border-bottom:1.5px solid var(--ink);font-family:var(--sans);font-size:12.5px;padding:6px 2px}
+.check-add input:focus{outline:none;border-bottom-color:var(--red)}
+.check-add button{flex:none;background:var(--ink);color:var(--paper);border:none;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:0 14px}
+.check-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-lo);margin-bottom:16px}
+
 @media(max-width:760px){
   .board{grid-auto-flow:row;grid-auto-columns:unset}
   .col{max-height:none}
+  .f3{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -137,9 +183,29 @@ button{font:inherit;cursor:pointer}
   <div class="board-head">
     <h1>Control de proyectos</h1>
     <span class="count" id="totalCount">— proyectos</span>
+    <div class="view-toggle">
+      <button id="viewBoardBtn" class="on">Tablero</button>
+      <button id="viewListBtn">Lista</button>
+    </div>
     <button class="new-btn" id="newBtn">+ Nuevo proyecto</button>
   </div>
   <div class="board" id="board"></div>
+  <div class="table-wrap hidden" id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="name">Proyecto<span class="arrow"></span></th>
+          <th data-sort="client">Cliente<span class="arrow"></span></th>
+          <th data-sort="status">Estado<span class="arrow"></span></th>
+          <th data-sort="priority">Prioridad<span class="arrow"></span></th>
+          <th data-sort="progress">Avance<span class="arrow"></span></th>
+          <th data-sort="due_date">Entrega<span class="arrow"></span></th>
+          <th data-sort="tasks">Subtareas<span class="arrow"></span></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -149,7 +215,7 @@ button{font:inherit;cursor:pointer}
     <input type="hidden" id="pId">
     <div class="field"><label>Nombre del proyecto</label><input type="text" id="pName"></div>
     <div class="field"><label>Cliente / Organización</label><input type="text" id="pClient"></div>
-    <div class="f2">
+    <div class="f3">
       <div class="field"><label>Estado</label>
         <select id="pStatus">
           <option>Solicitud</option>
@@ -166,9 +232,22 @@ button{font:inherit;cursor:pointer}
           <option>Alta</option>
         </select>
       </div>
+      <div class="field"><label>Entrega</label><input type="date" id="pDue"></div>
     </div>
     <div class="field"><label>Avance (%)</label><input type="number" id="pProgress" min="0" max="100" value="0"></div>
     <div class="field"><label>Descripción</label><textarea id="pDesc" rows="3"></textarea></div>
+
+    <div class="checklist-head">
+      <label>Subtareas</label>
+      <span class="cl-pct" id="clPct"></span>
+    </div>
+    <div class="checklist" id="checklist"></div>
+    <div class="check-add" id="checkAddRow">
+      <input type="text" id="newTaskInput" placeholder="Nueva subtarea…">
+      <button id="addTaskBtn">Agregar</button>
+    </div>
+    <div class="check-note hidden" id="checkNote">Guarda el proyecto primero para agregar subtareas.</div>
+
     <div class="modal-actions">
       <button class="mbtn solid" id="saveBtn">Guardar</button>
       <button class="mbtn danger hidden" id="deleteBtn">Eliminar</button>
@@ -189,9 +268,13 @@ const STATUS_COLOR = {Solicitud:'#9A7B1F',Evaluación:'#B3261E',Desarrollo:'#1E5
 const gate=document.getElementById('gate');
 const gateErr=document.getElementById('gateErr');
 const board=document.getElementById('board');
+const tableWrap=document.getElementById('tableWrap');
+const tableBody=document.getElementById('tableBody');
 const totalCount=document.getElementById('totalCount');
 const modalBg=document.getElementById('modalBg');
 const modalMsg=document.getElementById('modalMsg');
+const viewBoardBtn=document.getElementById('viewBoardBtn');
+const viewListBtn=document.getElementById('viewListBtn');
 
 async function api(path, opts) {
   const res = await fetch(API_BASE + path, {
@@ -235,6 +318,9 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 let projects = [];
+let currentView = 'board';
+let sortKey = 'updated_at';
+let sortDir = 'desc';
 
 async function loadProjects() {
   const { projects: list } = await api('/api/projects');
@@ -242,13 +328,29 @@ async function loadProjects() {
   render();
 }
 
+function setView(view) {
+  currentView = view;
+  viewBoardBtn.classList.toggle('on', view === 'board');
+  viewListBtn.classList.toggle('on', view === 'list');
+  board.classList.toggle('hidden', view !== 'board');
+  tableWrap.classList.toggle('hidden', view !== 'list');
+  render();
+}
+viewBoardBtn.addEventListener('click', () => setView('board'));
+viewListBtn.addEventListener('click', () => setView('list'));
+
 function render() {
   totalCount.textContent = projects.length + (projects.length === 1 ? ' proyecto' : ' proyectos');
+  if (currentView === 'board') renderBoard(); else renderTable();
+}
+
+function renderBoard() {
   board.innerHTML = '';
   STATUSES.forEach(status => {
     const items = projects.filter(p => p.status === status);
     const col = document.createElement('div');
     col.className = 'col';
+    col.dataset.status = status;
     col.innerHTML = `
       <div class="col-head">
         <span class="dot" style="background:${STATUS_COLOR[status]}"></span>
@@ -263,13 +365,60 @@ function render() {
     } else {
       items.forEach(p => body.appendChild(renderCard(p)));
     }
+    body.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+    body.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+    body.addEventListener('drop', async e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      const project = projects.find(p => String(p.id) === id);
+      if (!project || project.status === status) return;
+      try {
+        await api('/api/projects/' + id, { method: 'PATCH', body: JSON.stringify({ status }) });
+        await loadProjects();
+      } catch (err) {
+        alert('No se pudo mover el proyecto: ' + err.message);
+      }
+    });
     board.appendChild(col);
   });
+}
+
+function dueInfo(dateStr) {
+  if (!dateStr) return null;
+  const due = new Date(dateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diffDays = Math.round((due - today) / 86400000);
+  let cls = '';
+  if (diffDays < 0) cls = 'overdue';
+  else if (diffDays <= 3) cls = 'soon';
+  const label = due.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  return { cls, label, diffDays };
+}
+
+function taskProgress(p) {
+  const tasks = p.tasks || [];
+  if (tasks.length === 0) return null;
+  const done = tasks.filter(t => t.done).length;
+  return { done, total: tasks.length };
 }
 
 function renderCard(p) {
   const card = document.createElement('div');
   card.className = 'card';
+  card.draggable = true;
+  card.addEventListener('dragstart', e => {
+    card.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', String(p.id));
+  });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+  const due = dueInfo(p.due_date);
+  const tp = taskProgress(p);
+  const footBits = [];
+  if (due) footBits.push(`<span class="due ${due.cls}">${due.label}</span>`);
+  if (tp) footBits.push(`<span class="tasks-count">${tp.done}/${tp.total} tareas</span>`);
+
   card.innerHTML = `
     <div class="top">
       <span class="name">${escapeHtml(p.name)}</span>
@@ -281,10 +430,65 @@ function renderCard(p) {
       <span class="bar"><i style="width:${p.progress}%"></i></span>
       <span class="pct">${p.progress}%</span>
     </div>
+    ${footBits.length ? `<div class="foot-row">${footBits.join('')}</div>` : ''}
   `;
   card.addEventListener('click', () => openModal(p));
   return card;
 }
+
+function renderTable() {
+  const sorted = [...projects].sort((a, b) => {
+    let av, bv;
+    if (sortKey === 'tasks') {
+      av = (a.tasks || []).length; bv = (b.tasks || []).length;
+    } else {
+      av = a[sortKey]; bv = b[sortKey];
+    }
+    av = av == null ? '' : av; bv = bv == null ? '' : bv;
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  document.querySelectorAll('thead th').forEach(th => {
+    const arrow = th.querySelector('.arrow');
+    arrow.textContent = th.dataset.sort === sortKey ? (sortDir === 'asc' ? '↑' : '↓') : '';
+  });
+
+  if (sorted.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Sin proyectos</div></td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = '';
+  sorted.forEach(p => {
+    const due = dueInfo(p.due_date);
+    const tp = taskProgress(p);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name-cell">${escapeHtml(p.name)}</td>
+      <td>${escapeHtml(p.client || '—')}</td>
+      <td>${escapeHtml(p.status)}</td>
+      <td><span class="tag ${p.priority}">${p.priority}</span></td>
+      <td><div class="row-meta"><span class="bar"><i style="width:${p.progress}%"></i></span><span class="pct">${p.progress}%</span></div></td>
+      <td>${due ? `<span class="due ${due.cls}" style="border:1px solid currentColor;padding:2px 6px;font-family:var(--mono);font-size:9px">${due.label}</span>` : '—'}</td>
+      <td>${tp ? tp.done + '/' + tp.total : '—'}</td>
+    `;
+    tr.addEventListener('click', () => openModal(p));
+    tableBody.appendChild(tr);
+  });
+}
+
+document.querySelectorAll('thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortKey = key; sortDir = 'asc'; }
+    renderTable();
+  });
+});
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -292,7 +496,10 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+let modalProject = null;
+
 function openModal(project) {
+  modalProject = project;
   modalMsg.textContent = '';
   document.getElementById('modalTitle').textContent = project ? 'Editar proyecto' : 'Nuevo proyecto';
   document.getElementById('pId').value = project ? project.id : '';
@@ -300,12 +507,77 @@ function openModal(project) {
   document.getElementById('pClient').value = project ? project.client || '' : '';
   document.getElementById('pStatus').value = project ? project.status : 'Solicitud';
   document.getElementById('pPriority').value = project ? project.priority : 'Normal';
+  document.getElementById('pDue').value = project ? (project.due_date || '') : '';
   document.getElementById('pProgress').value = project ? project.progress : 0;
   document.getElementById('pDesc').value = project ? project.description || '' : '';
   document.getElementById('deleteBtn').classList.toggle('hidden', !project);
+
+  document.getElementById('checkAddRow').classList.toggle('hidden', !project);
+  document.getElementById('checkNote').classList.toggle('hidden', !!project);
+  renderChecklist();
+
   modalBg.classList.remove('hidden');
 }
-function closeModal() { modalBg.classList.add('hidden'); }
+function closeModal() { modalBg.classList.add('hidden'); modalProject = null; }
+
+function renderChecklist() {
+  const box = document.getElementById('checklist');
+  const pct = document.getElementById('clPct');
+  const tasks = (modalProject && modalProject.tasks) || [];
+  if (!modalProject) { box.innerHTML = ''; pct.textContent = ''; return; }
+  if (tasks.length === 0) {
+    box.innerHTML = '<div class="check-empty">Sin subtareas todavía</div>';
+    pct.textContent = '';
+    return;
+  }
+  const done = tasks.filter(t => t.done).length;
+  pct.textContent = done + '/' + tasks.length;
+  box.innerHTML = '';
+  tasks.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'check-row' + (t.done ? ' done' : '');
+    row.innerHTML = `
+      <input type="checkbox" ${t.done ? 'checked' : ''}>
+      <span class="ct">${escapeHtml(t.title)}</span>
+      <button class="del" aria-label="Eliminar">✕</button>
+    `;
+    row.querySelector('input').addEventListener('change', async e => {
+      await api('/api/tasks/' + t.id, { method: 'PATCH', body: JSON.stringify({ done: e.target.checked }) });
+      t.done = e.target.checked;
+      renderChecklist();
+      loadProjects();
+    });
+    row.querySelector('.del').addEventListener('click', async () => {
+      await api('/api/tasks/' + t.id, { method: 'DELETE' });
+      modalProject.tasks = modalProject.tasks.filter(x => x.id !== t.id);
+      renderChecklist();
+      loadProjects();
+    });
+    box.appendChild(row);
+  });
+}
+
+document.getElementById('addTaskBtn').addEventListener('click', async () => {
+  const input = document.getElementById('newTaskInput');
+  const title = input.value.trim();
+  if (!title || !modalProject) return;
+  try {
+    const { id } = await api('/api/projects/' + modalProject.id + '/tasks', {
+      method: 'POST', body: JSON.stringify({ title }),
+    });
+    modalProject.tasks = modalProject.tasks || [];
+    modalProject.tasks.push({ id, title, done: false });
+    input.value = '';
+    renderChecklist();
+    loadProjects();
+  } catch (e) {
+    modalMsg.style.color = 'var(--red)';
+    modalMsg.textContent = '> ' + e.message;
+  }
+});
+document.getElementById('newTaskInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('addTaskBtn').click();
+});
 
 document.getElementById('newBtn').addEventListener('click', () => openModal(null));
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
@@ -320,6 +592,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     priority: document.getElementById('pPriority').value,
     progress: Number(document.getElementById('pProgress').value),
     description: document.getElementById('pDesc').value.trim(),
+    due_date: document.getElementById('pDue').value || null,
   };
   if (!payload.name) { modalMsg.style.color = 'var(--red)'; modalMsg.textContent = '> El nombre es obligatorio.'; return; }
   try {
