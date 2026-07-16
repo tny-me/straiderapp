@@ -5,7 +5,7 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "udsg-admin"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "1bdd5765-e2cf-4a3c-b027-3efc60e746a6"
 
 # Dominio del panel que puede llamar a esta API (para CORS).
 # Cambia esto si sirves el panel desde otra URL.
