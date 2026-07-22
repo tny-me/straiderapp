@@ -1,5 +1,7 @@
-// UDSG — comportamiento compartido del sitio (revelado en scroll, paralaje, enlace activo)
+// UDSG — comportamiento compartido del sitio (revelado en scroll, video decks, enlace activo)
 (function () {
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // resaltar el enlace de la página actual en el pie
   const here = location.pathname.replace(/\/index\.html$/, '/').replace(/\/$/, '') || '/';
   document.querySelectorAll('.footer-links a[href]').forEach(a => {
@@ -25,19 +27,25 @@
     setTimeout(() => reveals.forEach(el => el.classList.add('in')), 4000);
   }
 
-  // paralaje sutil del diagrama del hero al mover el mouse (solo escritorio, respeta reduced-motion)
-  const schematic = document.querySelector('.hero-schematic');
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (schematic && !reduceMotion && matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const panel = document.querySelector('.hero-panel');
-    panel.addEventListener('mousemove', (e) => {
-      const r = panel.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      schematic.style.transform = `translate(${x * -10}px, ${y * -10}px)`;
-    });
-    panel.addEventListener('mouseleave', () => {
-      schematic.style.transform = '';
-    });
+  // videos de los "decks": solo reproducen mientras están visibles (ahorra datos/batería);
+  // con reduced-motion se quedan en el poster, sin reproducir nunca
+  const deckVideos = document.querySelectorAll('.deck-video');
+  if (deckVideos.length && !reduceMotion) {
+    if ('IntersectionObserver' in window) {
+      const vio = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const v = entry.target;
+          if (entry.isIntersecting) {
+            if (v.readyState === 0) v.load();
+            v.play().catch(() => {});
+          } else {
+            v.pause();
+          }
+        });
+      }, { threshold: 0.3 });
+      deckVideos.forEach(v => vio.observe(v));
+    } else {
+      deckVideos.forEach(v => v.play().catch(() => {}));
+    }
   }
 })();
