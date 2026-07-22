@@ -81,11 +81,12 @@ html.js-reveal .reveal.in{opacity:1;transform:none}
 .btn.on-dark.solid:hover{background:transparent;color:#fff}
 .btn.on-dark:not(.solid):hover{background:#fff;color:var(--dark)}
 
-/* ============ HERO DE PORTADA: mosaico de video a todo el ancho ============ */
+/* ============ HERO DE PORTADA: video a todo el ancho, en carrusel ============ */
 .hero-full{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;background:var(--dark)}
-.hero-mosaic{position:absolute;inset:0;display:flex}
-.hero-mosaic .deck-video{flex:1;min-width:0;height:100%;object-fit:cover;display:block}
-.hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,8,7,.55) 0%,rgba(8,8,7,.35) 38%,rgba(8,8,7,.55) 72%,rgba(8,8,7,.82) 100%)}
+.hero-mosaic{position:absolute;inset:0}
+.hero-mosaic .deck-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.04);transition:opacity 1.6s ease,transform 7s linear}
+.hero-mosaic .deck-video.is-active{opacity:1;transform:scale(1)}
+.hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,8,7,.6) 0%,rgba(8,8,7,.32) 38%,rgba(8,8,7,.5) 72%,rgba(8,8,7,.85) 100%)}
 .hero-overlay{position:relative;z-index:2;max-width:920px;margin:0 auto;padding:calc(var(--header-h) + 40px) 32px 64px;text-align:center;color:#fff}
 .hero-overlay .eyebrow{justify-content:center;color:#fff}
 .hero-overlay .eyebrow .idx{color:rgba(255,255,255,.6)}
@@ -93,10 +94,10 @@ html.js-reveal .reveal.in{opacity:1;transform:none}
 .hero-overlay h1{max-width:none;color:#fff}
 .hero-overlay .lede{max-width:640px;margin-left:auto;margin-right:auto;color:rgba(255,255,255,.82)}
 .hero-overlay .hero-actions{justify-content:center}
-@media(max-width:760px){
-  .hero-mosaic{flex-wrap:wrap}
-  .hero-mosaic .deck-video{flex:1 1 33%;height:33.4%}
-}
+.hero-dots{position:absolute;z-index:2;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.hero-dots span{width:22px;height:3px;background:rgba(255,255,255,.3);transition:background .3s}
+.hero-dots span.is-active{background:#fff}
+@media(max-width:640px){.hero-dots{bottom:18px}}
 
 /* ============ SECCIONES ============ */
 .section{padding:112px 32px;position:relative;overflow:hidden}

@@ -27,25 +27,29 @@
     setTimeout(() => reveals.forEach(el => el.classList.add('in')), 4000);
   }
 
-  // videos de los "decks": solo reproducen mientras están visibles (ahorra datos/batería);
-  // con reduced-motion se quedan en el poster, sin reproducir nunca
-  const deckVideos = document.querySelectorAll('.deck-video');
-  if (deckVideos.length && !reduceMotion) {
-    if ('IntersectionObserver' in window) {
-      const vio = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const v = entry.target;
-          if (entry.isIntersecting) {
-            if (v.readyState === 0) v.load();
-            v.play().catch(() => {});
-          } else {
-            v.pause();
-          }
-        });
-      }, { threshold: 0.3 });
-      deckVideos.forEach(v => vio.observe(v));
-    } else {
-      deckVideos.forEach(v => v.play().catch(() => {}));
+  // hero de video a todo el ancho: un clip a la vez, en carrusel con crossfade;
+  // con reduced-motion se queda en el primer poster, sin reproducir ni rotar
+  const heroVideos = document.querySelectorAll('.hero-mosaic .deck-video');
+  const heroDots = document.querySelectorAll('.hero-dots span');
+  if (heroVideos.length) {
+    const showSlide = (i) => {
+      const v = heroVideos[i];
+      if (v.readyState === 0) v.load();
+      v.play().catch(() => {});
+      v.classList.add('is-active');
+      if (heroDots[i]) heroDots[i].classList.add('is-active');
+    };
+    showSlide(0);
+    if (heroVideos.length > 1 && !reduceMotion) {
+      let active = 0;
+      setInterval(() => {
+        const prev = active;
+        active = (active + 1) % heroVideos.length;
+        showSlide(active);
+        heroVideos[prev].classList.remove('is-active');
+        if (heroDots[prev]) heroDots[prev].classList.remove('is-active');
+        setTimeout(() => heroVideos[prev].pause(), 1700);
+      }, 5500);
     }
   }
 })();
