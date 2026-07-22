@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicitar proyecto — UDSG®</title>
-<meta name="description" content="Formulario 14: solicita un proyecto a UDSG. Las solicitudes se evalúan por necesidad y viabilidad, no por presupuesto.">
+<title>Solicitar diagnóstico — UDSG®</title>
+<meta name="description" content="Cuéntanos cómo opera tu organización hoy. Con esa información diseñamos la primera propuesta de intervención tecnológica.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://udsg.dev/solicitar/">
-<meta property="og:site_name" content="UDSG — United Deployment Systems Group">
-<meta property="og:title" content="Solicitar proyecto — UDSG®">
-<meta property="og:description" content="Formulario 14: cuéntanos qué necesitas.">
+<meta property="og:site_name" content="UDSG">
+<meta property="og:title" content="Solicitar diagnóstico — UDSG®">
+<meta property="og:description" content="Cuéntanos cómo opera tu organización hoy.">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,31 +19,22 @@
 </head>
 <body>
 
-<div class="page-guides" aria-hidden="true"></div>
-<div class="class-bar">Organización sin fines de lucro · Financiada por donaciones · Independiente del Estado</div>
-
 <header class="site-header">
   <a href="/" class="brand">UDSG<sup>®</sup></a>
-  <span class="brand-sub">United Deployment Systems Group</span>
-  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false"><span></span></button>
-  <nav class="site-nav" id="siteNav">
-    <a href="/">Inicio</a>
-    <a href="/modelo/">Modelo</a>
-    <a href="/acerca/">Acerca</a>
-    <a href="/solicitar/">Solicitar</a>
-  </nav>
-  <span class="site-status"><span class="led"></span>Activo · <span id="clock">--:--:--Z</span></span>
+  <a href="/solicitar/" class="header-cta">Solicitar</a>
 </header>
 
-<section class="hero" style="padding-bottom:70px">
-  <div class="hero-inner frame">
-    <div class="eyebrow"><span class="idx">Formulario 14</span> Solicitud de proyecto</div>
-    <h1 style="font-size:clamp(34px,5.6vw,62px)">Cuéntanos <span class="hl">qué necesitas</span>.</h1>
-    <p class="lede">Las solicitudes se evalúan por necesidad y viabilidad, no por presupuesto. Responderemos si la solicitud entra en evaluación.</p>
+<section class="hero" style="padding-bottom:56px">
+  <div class="hero-grid" style="grid-template-columns:1fr;padding-bottom:0;max-width:900px">
+    <div class="hero-copy frame">
+      <div class="eyebrow"><span class="idx">Formulario 14</span> Inicio de proyecto</div>
+      <h1 style="max-width:none">Cuéntanos <span class="hl">cómo opera</span> tu organización.</h1>
+      <p class="lede" style="max-width:640px">Con esa información diseñamos la primera propuesta de intervención tecnológica. Te contactaremos para agendar una conversación.</p>
+    </div>
   </div>
 </section>
 
-<section class="section light">
+<section class="section paper">
   <div class="section-inner">
     <div class="form-wrap">
       <div class="f2">
@@ -51,8 +42,8 @@
         <div class="field"><label>Correo de contacto <em>*</em></label><input type="email" id="fMail" placeholder="—" autocomplete="email"></div>
       </div>
       <div class="f2">
-        <div class="field"><label>Tipo de proyecto</label>
-          <select id="fTipo"><option>Sitio web / identidad digital</option><option>Plataforma o software</option><option>Alojamiento y mantenimiento</option><option>Asesoría / consultoría</option><option>No estoy seguro</option></select>
+        <div class="field"><label>Tipo de necesidad</label>
+          <select id="fTipo"><option>Plataforma o sistema interno</option><option>Automatización de procesos</option><option>Sitio, portal o aplicación</option><option>Infraestructura y hosting</option><option>Soporte y mantenimiento continuo</option><option>No estoy seguro</option></select>
         </div>
         <div class="field"><label>Urgencia</label>
           <select id="fUrg"><option>Sin fecha definida</option><option>Este mes</option><option>1–2 meses</option><option>3+ meses</option></select>
@@ -60,11 +51,11 @@
       </div>
       <div class="field">
         <label>Descripción de la necesidad <em>*</em> <span class="count" id="count">0 / 400</span></label>
-        <textarea id="fDesc" rows="5" maxlength="400" placeholder="Qué necesitas, para quién y por qué importa."></textarea>
+        <textarea id="fDesc" rows="5" maxlength="400" placeholder="Cómo opera tu organización hoy, qué necesita y qué te gustaría lograr."></textarea>
       </div>
       <button class="btn solid" id="send" style="cursor:pointer;width:100%">Enviar solicitud</button>
       <div class="form-msg" id="msg"></div>
-      <div class="form-note">Campos marcados con * obligatorios · Responderemos si la solicitud entra en evaluación</div>
+      <div class="form-note">Campos marcados con * obligatorios · Te contactaremos para agendar una conversación</div>
     </div>
   </div>
 </section>
@@ -73,15 +64,15 @@
   <div class="footer-inner">
     <div class="footer-id">
       <div class="brand">UDSG<sup>®</sup></div>
-      <p>United Deployment Systems Group es una organización civil de ingeniería táctica y desarrollo tecnológico, independiente del Estado y sostenida por donaciones. Diseñamos, desplegamos y operamos infraestructura digital para quienes la necesitan.</p>
+      <p>UDSG es un departamento tecnológico externo: diseñamos, desplegamos y operamos la infraestructura digital que tu organización necesita para operar con mayor claridad, velocidad y control.</p>
       <p class="mail"><a href="mailto:acceso@udsg.dev">acceso@udsg.dev</a></p>
     </div>
     <div class="footer-links">
       <div>
         <h6>Plataforma</h6>
         <a href="/">Inicio</a>
-        <a href="/modelo/">Modelo de operación</a>
-        <a href="/acerca/">Acerca de</a>
+        <a href="/modelo/">Modelo</a>
+        <a href="/acerca/">Acerca</a>
       </div>
       <div>
         <h6>Participar</h6>
@@ -91,7 +82,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span>UDSG® · Organización sin fines de lucro</span>
+    <span>UDSG® · Tecnología para operaciones reales</span>
     <span>© 2026 United Deployment Systems Group</span>
   </div>
 </footer>
@@ -120,13 +111,13 @@ document.getElementById('send').addEventListener('click', () => {
   const bodyText = 'Folio: ' + folio + '\n' +
     'Organización / Nombre: ' + org.value.trim() + '\n' +
     'Correo de contacto: ' + mail.value.trim() + '\n' +
-    'Tipo de proyecto: ' + tipo + '\n' +
+    'Tipo de necesidad: ' + tipo + '\n' +
     'Urgencia: ' + urg + '\n\n' +
     'Descripción de la necesidad:\n' + fDesc.value.trim();
   window.location.href = 'mailto:acceso@udsg.dev?subject=' + subject + '&body=' + encodeURIComponent(bodyText);
   setTimeout(() => {
     msg.style.color = 'var(--green)';
-    msg.textContent = '> Solicitud registrada con folio ' + folio + '. Te contactaremos si entra en evaluación.';
+    msg.textContent = '> Solicitud registrada con folio ' + folio + '. Te contactaremos pronto.';
     btn.textContent = 'Solicitud enviada';
   }, 900);
 });

@@ -1,38 +1,8 @@
-// UDSG — comportamiento compartido del sitio (menú, reloj, revelado en scroll)
+// UDSG — comportamiento compartido del sitio (revelado en scroll, paralaje, enlace activo)
 (function () {
-  // reloj UTC en el header
-  const clock = document.getElementById('clock');
-  if (clock) {
-    const tick = () => {
-      const d = new Date();
-      clock.textContent =
-        String(d.getUTCHours()).padStart(2, '0') + ':' +
-        String(d.getUTCMinutes()).padStart(2, '0') + ':' +
-        String(d.getUTCSeconds()).padStart(2, '0') + 'Z';
-    };
-    tick();
-    setInterval(tick, 1000);
-  }
-
-  // menú móvil
-  const toggle = document.getElementById('menuToggle');
-  const nav = document.getElementById('siteNav');
-  if (toggle && nav) {
-    toggle.addEventListener('click', () => {
-      const open = nav.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-    nav.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        nav.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-      });
-    });
-  }
-
-  // resaltar el enlace de la página actual
+  // resaltar el enlace de la página actual en el pie
   const here = location.pathname.replace(/\/index\.html$/, '/').replace(/\/$/, '') || '/';
-  document.querySelectorAll('.site-nav a[href]').forEach(a => {
+  document.querySelectorAll('.footer-links a[href]').forEach(a => {
     const target = a.getAttribute('href').replace(/\/index\.html$/, '/').replace(/\/$/, '') || '/';
     if (target === here) a.classList.add('on');
   });
@@ -51,7 +21,7 @@
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     reveals.forEach(el => io.observe(el));
-    // red de seguridad: si algo queda sin revelar (ej. entra sin scroll de por medio), lo mostramos igual
+    // red de seguridad: si algo queda sin revelar, lo mostramos igual
     setTimeout(() => reveals.forEach(el => el.classList.add('in')), 4000);
   }
 
@@ -59,14 +29,14 @@
   const schematic = document.querySelector('.hero-schematic');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (schematic && !reduceMotion && matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const hero = document.querySelector('.hero');
-    hero.addEventListener('mousemove', (e) => {
-      const r = hero.getBoundingClientRect();
+    const panel = document.querySelector('.hero-panel');
+    panel.addEventListener('mousemove', (e) => {
+      const r = panel.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5;
       const y = (e.clientY - r.top) / r.height - 0.5;
-      schematic.style.transform = `translate(${x * -14}px, calc(-50% + ${y * -14}px))`;
+      schematic.style.transform = `translate(${x * -10}px, ${y * -10}px)`;
     });
-    hero.addEventListener('mouseleave', () => {
+    panel.addEventListener('mouseleave', () => {
       schematic.style.transform = '';
     });
   }
