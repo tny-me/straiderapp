@@ -156,6 +156,17 @@
   .load-in.shown{opacity:1; transform:translateY(0);}
   @media (prefers-reduced-motion: reduce){ .load-in{opacity:1; transform:none;} }
 
+  /* ---------------- TYPEWRITER (títulos que se escriben al hacer scroll) ---------------- */
+  .tw-char{opacity:0; transition:opacity 0.05s linear;}
+  .tw-char.tw-in{opacity:1;}
+  .tw-cursor{display:inline-block; width:2px; height:0.85em; margin-left:2px; background:currentColor; opacity:0; vertical-align:-0.1em;}
+  .tw-cursor.tw-active{opacity:1; animation:tw-blink 0.9s step-end infinite;}
+  @keyframes tw-blink{50%{opacity:0;}}
+  @media (prefers-reduced-motion: reduce){
+    .tw-char{opacity:1 !important; transition:none;}
+    .tw-cursor{display:none;}
+  }
+
   /* stat strip under hero — structural facts about the site's own content, not fabricated business claims */
   .stat-strip{
     max-width:1360px; margin:0 auto; padding:32px 44px;
@@ -719,6 +730,78 @@
     });
   }, { threshold: 0.3, rootMargin: '0px 0px -8% 0px' });
   document.querySelectorAll('.engage-item, .proc-step').forEach(el => io.observe(el));
+
+  // ---- TYPEWRITER: los titulares se "escriben" al entrar en pantalla ----
+  (function(){
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const CHAR_MS = 20;
+
+    // envuelve cada carácter de los nodos de texto en un span, preservando
+    // los <span class="accent">/<span class="fade"> y <br> ya existentes
+    function wrapChars(root){
+      Array.from(root.childNodes).forEach(node => {
+        if (node.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          Array.from(node.textContent).forEach(ch => {
+            const span = document.createElement('span');
+            span.className = 'tw-char';
+            span.textContent = ch;
+            frag.appendChild(span);
+          });
+          node.parentNode.replaceChild(frag, node);
+        } else if (node.nodeType === 1 && node.tagName !== 'BR') {
+          wrapChars(node);
+        }
+      });
+    }
+
+    function typeOut(chars, cursor){
+      let i = 0;
+      cursor.classList.add('tw-active');
+      const timer = setInterval(() => {
+        if (i < chars.length) {
+          chars[i].classList.add('tw-in');
+          i++;
+        } else {
+          clearInterval(timer);
+          setTimeout(() => cursor.classList.remove('tw-active'), 400);
+        }
+      }, CHAR_MS);
+    }
+
+    const targets = document.querySelectorAll('.decl-huge, .decl-quote, .sec-head h2, .diff-headline, .company-quote, .cta-final h2');
+    const prepared = [];
+    targets.forEach(el => {
+      wrapChars(el);
+      const chars = Array.from(el.querySelectorAll('.tw-char'));
+      const cursor = document.createElement('span');
+      cursor.className = 'tw-cursor';
+      el.appendChild(cursor);
+      if (reduceMotion) { chars.forEach(c => c.classList.add('tw-in')); return; }
+      prepared.push({ el, chars, cursor, done:false });
+    });
+
+    if (!reduceMotion && prepared.length) {
+      const twIO = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const item = prepared.find(p => p.el === entry.target);
+            if (item && !item.done) {
+              item.done = true;
+              typeOut(item.chars, item.cursor);
+            }
+            twIO.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.35, rootMargin: '0px 0px -10% 0px' });
+      prepared.forEach(p => twIO.observe(p.el));
+
+      // red de seguridad: si algo no se llegó a escribir, mostrarlo completo
+      setTimeout(() => {
+        prepared.forEach(p => { if (!p.done) { p.done = true; p.chars.forEach(c => c.classList.add('tw-in')); } });
+      }, 8000);
+    }
+  })();
 
   // ---- CARRUSEL DE CHIPS: cada chip se llena como barra de progreso y avanza solo ----
   (function(){
