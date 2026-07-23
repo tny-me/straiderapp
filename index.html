@@ -51,10 +51,6 @@
   .nav-left .wordmark{font-family:'Space Grotesk'; font-weight:600; font-size:17px;}
   .nav-left .subname{font-family:'IBM Plex Mono'; font-size:10px; color:#7C7C74; letter-spacing:0.04em; transition:opacity 0.3s ease;}
   nav.scrolled .subname{opacity:0; width:0;}
-  .nav-links{display:flex; gap:34px; font-size:13.5px; color:var(--ink-soft);}
-  .nav-links a{text-decoration:none; position:relative; padding-bottom:3px;}
-  .nav-links a::after{content:''; position:absolute; left:0; bottom:0; width:0; height:1.5px; background:var(--accent); transition:width 0.25s ease;}
-  .nav-links a:hover::after{width:100%;}
   .nav-right{display:flex; align-items:center; gap:12px;}
   .nav-cta{
     font-size:13px; font-weight:500; background:var(--paper); color:var(--ink);
@@ -66,6 +62,72 @@
     width:36px; height:36px; border-radius:999px; border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
     color:var(--ink-soft); background:transparent; cursor:pointer;
+    font:inherit; padding:0; transition:background 0.2s ease, border-color 0.2s ease;
+  }
+  .nav-icon:hover{border-color:var(--ink-soft);}
+
+  /* ---------------- BURGER (dos líneas que se convierten en X) ---------------- */
+  .burger{width:15px; height:11px; position:relative;}
+  .burger span{
+    position:absolute; left:0; width:100%; height:1.5px; background:currentColor;
+    transition:transform 0.25s ease, opacity 0.2s ease, top 0.25s ease;
+  }
+  .burger span:nth-child(1){top:0;}
+  .burger span:nth-child(2){top:9.5px;}
+  .menu-open .burger span:nth-child(1){top:4.75px; transform:rotate(45deg);}
+  .menu-open .burger span:nth-child(2){top:4.75px; transform:rotate(-45deg);}
+
+  /* ---------------- MENU OVERLAY (estilo Palantir: pantalla completa, links + acerca de) ---------------- */
+  .menu-overlay{
+    position:fixed; inset:0; z-index:100; background:var(--paper);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity 0.3s ease, visibility 0s linear 0.3s;
+    overflow-y:auto;
+  }
+  .menu-overlay.is-open{opacity:1; visibility:visible; pointer-events:auto; transition:opacity 0.3s ease;}
+  .menu-top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 40px;
+  }
+  .menu-body{
+    max-width:1180px; margin:0 auto; padding:80px 40px 100px;
+    display:grid; grid-template-columns:1fr 1fr; gap:64px;
+  }
+  .menu-links{display:flex; flex-direction:column; gap:6px;}
+  .menu-links a{
+    text-decoration:none; color:var(--ink); font-family:'Space Grotesk'; font-weight:500;
+    font-size:clamp(30px,5vw,52px); line-height:1.3; letter-spacing:-0.01em;
+    padding:6px 0; transition:color 0.2s ease; opacity:0; transform:translateY(14px);
+    transition:opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1), color 0.2s ease;
+  }
+  .menu-overlay.is-open .menu-links a{opacity:1; transform:translateY(0);}
+  .menu-links a:nth-child(1){transition-delay:0.05s;}
+  .menu-links a:nth-child(2){transition-delay:0.1s;}
+  .menu-links a:nth-child(3){transition-delay:0.15s;}
+  .menu-links a:nth-child(4){transition-delay:0.2s;}
+  .menu-links a:hover{color:var(--accent);}
+  .menu-about{
+    border-left:1px solid var(--line); padding-left:48px;
+    opacity:0; transition:opacity 0.5s ease 0.25s;
+  }
+  .menu-overlay.is-open .menu-about{opacity:1;}
+  .menu-about p{font-size:15px; line-height:1.75; color:var(--ink-soft); margin-top:16px; max-width:420px;}
+  .menu-access{
+    display:inline-block; margin-top:32px; font-size:14px; font-weight:500;
+    background:var(--ink); color:#fff; padding:13px 26px; border-radius:999px;
+    text-decoration:none; transition:background 0.2s ease;
+  }
+  .menu-access:hover{background:var(--accent);}
+  .menu-footer{
+    max-width:1180px; margin:0 auto; padding:24px 40px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:0.04em; color:#8A8F9C;
+  }
+  .menu-footer a{color:#8A8F9C; text-decoration:none;}
+  .menu-footer a:hover{color:var(--ink);}
+  body.menu-locked{overflow:hidden;}
+  @media (prefers-reduced-motion: reduce){
+    .menu-overlay, .menu-links a, .menu-about, .burger span{transition:none !important;}
   }
 
   /* ---------------- CHIP ROW (carrusel Apple/Palantir: chips que se llenan) ---------------- */
@@ -323,7 +385,10 @@
   /* ---------------- RESPONSIVE ---------------- */
   @media (max-width:900px){
     nav{padding:14px 20px;}
-    .nav-links{display:none;}
+    .menu-top{padding:14px 20px;}
+    .menu-body{grid-template-columns:1fr; gap:40px; padding:48px 20px 60px;}
+    .menu-about{border-left:none; padding-left:0; border-top:1px solid var(--line); padding-top:32px;}
+    .menu-footer{padding:20px 20px;}
     .chip-row{padding:12px 20px 16px; top:58px;}
     .hero-wrap{padding:4px 8px 0;}
     .hero{padding:32px 24px 0; min-height:auto; border-radius:10px;}
@@ -352,19 +417,43 @@
     <span class="wordmark">UDSG®</span>
     <span class="subname">UNITED DEPLOYMENT SYSTEMS GROUP</span>
   </div>
-  <div class="nav-links">
-    <a href="#caps">Capacidades</a>
-    <a href="#sectors">Sectores</a>
-    <a href="#company">Compañía</a>
-    <a href="#contact">Contacto</a>
-  </div>
   <div class="nav-right">
     <a href="#contact" class="nav-cta">Iniciar un proyecto</a>
-    <div class="nav-icon" aria-hidden="true">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-    </div>
+    <button type="button" class="nav-icon" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="menuOverlay">
+      <span class="burger"><span></span><span></span></span>
+    </button>
   </div>
 </nav>
+
+<div class="menu-overlay" id="menuOverlay" aria-hidden="true">
+  <div class="menu-top">
+    <div class="nav-left">
+      <span class="wordmark">UDSG®</span>
+      <span class="subname">UNITED DEPLOYMENT SYSTEMS GROUP</span>
+    </div>
+    <button type="button" class="nav-icon" id="menuClose" aria-label="Cerrar menú">
+      <span class="burger" style="transform:rotate(45deg)"><span style="top:4.75px"></span><span style="top:4.75px; transform:rotate(90deg)"></span></span>
+    </button>
+  </div>
+  <div class="menu-body">
+    <div class="menu-links" role="navigation" aria-label="Navegación principal">
+      <a href="#caps">Capacidades</a>
+      <a href="#sectors">Sectores</a>
+      <a href="#company">Compañía</a>
+      <a href="#contact">Contacto</a>
+    </div>
+    <div class="menu-about">
+      <div class="sec-label"><span class="dash"></span>Acerca de</div>
+      <p>UDSG es una empresa privada de tecnología e ingeniería de software. Diseñamos, desarrollamos, integramos y operamos soluciones digitales para empresas, instituciones y organizaciones con necesidades específicas.</p>
+      <p>Nuestro trabajo reúne software, infraestructura, automatización, datos e inteligencia artificial para construir sistemas funcionales, seguros y preparados para evolucionar.</p>
+      <a href="/admin/" class="menu-access">Acceso</a>
+    </div>
+  </div>
+  <div class="menu-footer">
+    <span>UDSG-CORE / ARCHITECTURE</span>
+    <a href="mailto:acceso@udsg.dev">acceso@udsg.dev</a>
+  </div>
+</div>
 
 <div class="chip-row" id="chipRow">
   <button type="button" class="chip active" data-i="0"><span class="chip-fill"></span><span class="chip-label">Deployment Model</span></button>
@@ -674,8 +763,8 @@
   <h2>¿Qué necesita construir su organización?</h2>
   <p>Cuéntenos qué proceso necesita mejorar, qué sistema necesita desarrollar o qué capacidad tecnológica necesita implementar.</p>
   <div class="cta-final-actions">
-    <a href="#" class="btn-primary">Iniciar un proyecto</a>
-    <a href="mailto:contacto@udsg.example" class="secondary">contacto@udsg.example</a>
+    <a href="/solicitar/" class="btn-primary">Iniciar un proyecto</a>
+    <a href="mailto:acceso@udsg.dev" class="secondary">acceso@udsg.dev</a>
   </div>
 </section>
 
@@ -719,6 +808,35 @@
   }
   window.addEventListener('scroll', onNavScroll, { passive:true });
   onNavScroll();
+
+  // ---- MENÚ DE HAMBURGUESA: overlay de pantalla completa (estilo Palantir) ----
+  (function(){
+    const toggle = document.getElementById('menuToggle');
+    const closeBtn = document.getElementById('menuClose');
+    const overlay = document.getElementById('menuOverlay');
+    if (!toggle || !overlay) return;
+
+    function openMenu(){
+      overlay.classList.add('is-open');
+      document.body.classList.add('menu-locked');
+      document.documentElement.classList.add('menu-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+    function closeMenu(){
+      overlay.classList.remove('is-open');
+      document.body.classList.remove('menu-locked');
+      document.documentElement.classList.remove('menu-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    function isOpen(){ return overlay.classList.contains('is-open'); }
+
+    toggle.addEventListener('click', () => { isOpen() ? closeMenu() : openMenu(); });
+    closeBtn.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) closeMenu(); });
+    overlay.querySelectorAll('.menu-links a').forEach(a => a.addEventListener('click', closeMenu));
+  })();
 
   // engagement cards + process dots — scroll reveal
   const io = new IntersectionObserver((entries) => {
