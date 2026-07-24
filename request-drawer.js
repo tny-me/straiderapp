@@ -64,7 +64,7 @@
         'Tipo de necesidad: ' + fTipo.value + '\n' +
         'Urgencia: ' + fUrg.value + '\n\n' +
         'Descripción de la necesidad:\n' + fDesc.value.trim();
-      window.location.href = 'mailto:acceso@udsg.dev?subject=' + subject + '&body=' + encodeURIComponent(bodyText);
+      window.location.href = 'mailto:anthoniomoreno1@gmail.com?subject=' + subject + '&body=' + encodeURIComponent(bodyText);
       setTimeout(() => {
         msg.style.color = '#3DDC84';
         msg.textContent = '> Solicitud registrada con folio ' + folio + '. Te contactaremos pronto.';
