@@ -387,40 +387,6 @@
   .sector-item h3{font-family:'Space Grotesk'; font-weight:500; font-size:19px; margin-bottom:12px;}
   .sector-item p{font-size:14px; line-height:1.65; color:var(--ink-soft);}
 
-  /* ---------------- DIFFERENTIATOR ---------------- */
-  .diff{background:var(--navy); color:var(--paper-text); padding:130px 48px;}
-  .diff-headline{
-    font-family:'Space Grotesk'; font-weight:600; text-align:left;
-    font-size:clamp(28px,3.8vw,46px); line-height:1.18; max-width:820px; margin:0 auto 80px;
-  }
-  .diff-headline .fade{color:#5B6180;}
-  .diff-headline .accent{color:#8CA0FF;}
-  .diff-grid{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-on-dark); border:1px solid var(--line-on-dark);}
-  .diff-item{background:var(--navy); padding:28px 24px;}
-  .diff-item .diff-no{font-family:'Space Grotesk'; font-weight:600; font-size:15px; color:var(--paper-text); margin-bottom:10px; display:block;}
-  .diff-item p{font-size:13px; line-height:1.6; color:var(--muted-on-dark);}
-
-  /* ---------------- COMPANY ---------------- */
-  .company{background:var(--paper); padding:120px 48px;}
-  .company-grid{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;}
-  .company-body p{font-size:15.5px; line-height:1.75; color:var(--ink-soft); margin-bottom:20px; max-width:520px;}
-  .company-quote{
-    font-family:'Space Grotesk'; font-weight:500; font-size:clamp(20px,2vw,25px);
-    color:var(--ink); margin-top:32px; border-top:1px solid var(--line); padding-top:26px;
-  }
-  .company-graphic{border:1px solid var(--line); background:var(--gray-50); padding:24px;}
-
-  /* ---------------- CTA FINAL ---------------- */
-  .cta-final{background:var(--accent); color:#fff; padding:120px 48px; text-align:center;}
-  .cta-final .sec-label{justify-content:center; color:#C6D0FF;}
-  .cta-final .sec-label .dash{background:#C6D0FF;}
-  .cta-final h2{font-family:'Space Grotesk'; font-weight:600; font-size:clamp(28px,3.6vw,44px); max-width:720px; margin:0 auto 22px;}
-  .cta-final p{font-size:15.5px; color:#D7DEFF; max-width:480px; margin:0 auto 36px;}
-  .cta-final-actions{display:flex; gap:24px; justify-content:center; align-items:center; flex-wrap:wrap;}
-  .cta-final .btn-primary{background:#fff; color:var(--accent-deep);}
-  .cta-final .btn-primary:hover{background:#EAEEFF;}
-  .cta-final a.secondary{color:#D7DEFF; font-family:'IBM Plex Mono'; font-size:13px; text-decoration:none; border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:2px;}
-
   /* ---------------- FOOTER ---------------- */
   footer{background:var(--ink); color:var(--paper-text); padding:60px 48px 30px;}
   .footer-top{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:48px; padding-bottom:36px; border-bottom:1px solid var(--line-on-dark); margin-bottom:22px;}
@@ -446,14 +412,12 @@
     .hero{padding:32px 24px 0; min-height:520px; border-radius:10px;}
     .hero-top{max-width:100%;}
     .hero-meta{flex-direction:column; align-items:flex-start; gap:6px; margin-top:28px;}
-    .declaration, .caps, .sectors, .diff, .company, .cta-final{padding-left:20px; padding-right:20px;}
+    .declaration, .caps, .sectors{padding-left:20px; padding-right:20px;}
     .decl-grid{grid-template-columns:1fr; gap:32px;}
     .caps-list{grid-template-columns:1fr;}
     .deploy-inner{padding:72px 20px;}
     .deploy-head{margin-bottom:40px;}
     .sectors-grid{grid-template-columns:1fr;}
-    .diff-grid{grid-template-columns:1fr 1fr;}
-    .company-grid{grid-template-columns:1fr;}
     .footer-top{grid-template-columns:1fr; gap:28px;}
   }
 
@@ -547,8 +511,7 @@
     <div class="menu-links" role="navigation" aria-label="Navegación principal">
       <a href="#caps">Capacidades</a>
       <a href="#sectors">Sectores</a>
-      <a href="#company">Compañía</a>
-      <a href="#contact">Contacto</a>
+      <a href="mailto:acceso@udsg.dev">Contacto</a>
     </div>
     <div class="menu-about">
       <div class="sec-label"><span class="dash"></span>Acerca de</div>
@@ -810,60 +773,6 @@
   </div>
 </section>
 
-<!-- ================= DIFFERENTIATOR ================= -->
-<section class="diff">
-  <p class="diff-headline"><span class="fade">UDSG no entrega únicamente código.</span><br>Entrega tecnología <span class="accent">funcionando dentro de una operación.</span></p>
-  <div class="diff-grid">
-    <div class="diff-item"><span class="diff-no">No vendemos plantillas.</span><p>Construimos alrededor de la necesidad.</p></div>
-    <div class="diff-item"><span class="diff-no">No desarrollamos por apariencia.</span><p>Cada componente cumple una función.</p></div>
-    <div class="diff-item"><span class="diff-no">No imponemos herramientas.</span><p>Integramos lo que ya funciona.</p></div>
-    <div class="diff-item"><span class="diff-no">No desaparecemos después.</span><p>Operamos y evolucionamos la tecnología.</p></div>
-  </div>
-</section>
-
-<!-- ================= COMPANY ================= -->
-<section class="company" id="company">
-  <div class="company-grid">
-    <div class="company-body">
-      <div class="sec-label"><span class="dash"></span>Company</div>
-      <h2 style="font-family:'Space Grotesk'; font-weight:500; font-size:clamp(24px,2.6vw,32px); margin-bottom:22px;">United Deployment Systems Group</h2>
-      <p>UDSG es una empresa privada de tecnología e ingeniería de software. Diseñamos, desarrollamos, integramos y operamos soluciones digitales para empresas, instituciones y organizaciones con necesidades específicas.</p>
-      <p>Nuestro trabajo reúne software, infraestructura, automatización, datos e inteligencia artificial para construir sistemas funcionales, seguros y preparados para evolucionar.</p>
-      <p class="company-quote">Tecnología construida para operar.</p>
-    </div>
-    <div class="company-graphic">
-      <svg viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg">
-        <g stroke="#E1E4E9" stroke-width="1" fill="none">
-          <rect x="20" y="20" width="440" height="340"/>
-          <path d="M20 100h440M20 200h440M20 280h440M140 20v340M320 20v340"/>
-        </g>
-        <g>
-          <circle cx="140" cy="100" r="5" fill="#2F4BFF"/>
-          <circle cx="320" cy="200" r="5" fill="#0E1116"/>
-          <circle cx="140" cy="280" r="5" fill="#0E1116"/>
-          <circle cx="320" cy="100" r="5" fill="#0E1116"/>
-          <path d="M140 100L320 200L140 280" stroke="#2F4BFF" stroke-width="1.2" fill="none" stroke-dasharray="3 4"/>
-        </g>
-        <g font-family="IBM Plex Mono" font-size="9" fill="#8A8F9C">
-          <text x="30" y="35">UDSG / SYS-MAP</text>
-          <text x="380" y="352">REV.01</text>
-        </g>
-      </svg>
-    </div>
-  </div>
-</section>
-
-<!-- ================= CTA FINAL ================= -->
-<section class="cta-final" id="contact">
-  <div class="sec-label"><span class="dash"></span>Start a deployment</div>
-  <h2>¿Qué necesita construir su organización?</h2>
-  <p>Cuéntenos qué proceso necesita mejorar, qué sistema necesita desarrollar o qué capacidad tecnológica necesita implementar.</p>
-  <div class="cta-final-actions">
-    <a href="#" class="btn-primary js-open-request">Iniciar un proyecto</a>
-    <a href="mailto:acceso@udsg.dev" class="secondary">acceso@udsg.dev</a>
-  </div>
-</section>
-
 <footer>
   <div class="footer-top">
     <div class="footer-brand">
@@ -875,8 +784,7 @@
       <h4>Navegación</h4>
       <a href="#caps">Capacidades</a>
       <a href="#sectors">Sectores</a>
-      <a href="#company">Compañía</a>
-      <a href="#contact">Contacto</a>
+      <a href="mailto:acceso@udsg.dev">Contacto</a>
     </div>
     <div class="footer-col">
       <h4>Legal</h4>
@@ -1036,7 +944,7 @@
       }, CHAR_MS);
     }
 
-    const targets = document.querySelectorAll('.decl-huge, .decl-quote, .sec-head h2, .diff-headline, .company-quote, .cta-final h2');
+    const targets = document.querySelectorAll('.decl-huge, .decl-quote, .sec-head h2');
     const prepared = [];
     targets.forEach(el => {
       wrapChars(el);
