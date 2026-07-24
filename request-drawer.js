@@ -14,6 +14,8 @@
   const count = document.getElementById('reqCount');
   const send = document.getElementById('reqSend');
   const msg = document.getElementById('reqMsg');
+  const success = document.getElementById('reqSuccess');
+  const successFolio = document.getElementById('reqSuccessFolio');
 
   function openDrawer(e) {
     if (e) e.preventDefault();
@@ -29,6 +31,17 @@
     drawer.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+  }
+
+  function resetForm() {
+    [fOrg, fMail, fPhone, fDesc].forEach(el => { if (el) { el.value = ''; el.closest('.req-field').classList.remove('err'); } });
+    if (fTipo) fTipo.selectedIndex = 0;
+    if (fUrg) fUrg.selectedIndex = 0;
+    if (count) count.textContent = '0 / 400';
+    msg.textContent = '';
+    send.disabled = false;
+    send.textContent = 'Enviar solicitud';
+    if (success) success.classList.remove('is-active');
   }
 
   document.querySelectorAll('.js-open-request').forEach(el => {
@@ -76,9 +89,12 @@
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) throw new Error(data.error || 'Error al enviar.');
-        msg.style.color = '#2E6B45';
-        msg.textContent = '> Solicitud registrada con folio ' + data.folio + '. Te contactaremos pronto.';
-        send.textContent = 'Solicitud enviada';
+        if (successFolio) successFolio.textContent = 'Folio ' + data.folio;
+        if (success) success.classList.add('is-active');
+        setTimeout(() => {
+          closeDrawer();
+          setTimeout(resetForm, 450);
+        }, 1900);
       } catch (err) {
         msg.style.color = '#B3261E';
         msg.textContent = '> No se pudo enviar. Intenta de nuevo o escríbenos a acceso@udsg.dev.';
